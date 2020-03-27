@@ -1,6 +1,5 @@
 require 'bencode'
 require 'socket'
-require 'digest'
 require 'pry'
 require 'uri'
 
@@ -8,7 +7,9 @@ require_relative 'torrent'
 require_relative 'tracker'
 
 
-data = File.read('torrent.torrent')
+filename = ARGV[0]
+
+data = File.read(filename)
 torrent_info = BEncode.load(data)
 
 torrent = Torrent.new(torrent_info, data)

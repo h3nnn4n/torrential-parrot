@@ -1,3 +1,5 @@
+require 'digest'
+
 class Torrent
   def initialize(bdata, raw_data)
     @bdata = bdata

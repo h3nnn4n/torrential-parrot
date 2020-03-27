@@ -18,6 +18,9 @@ class Tracker
 
     puts "peer_id: #{peer_id}"
     puts "tracker: #{host}:#{port}"
+    puts "scheme: #{scheme}"
+
+    raise "invalid scheme #{scheme}" unless scheme == 'udp'
   end
 
   def connect
