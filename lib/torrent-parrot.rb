@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bencode'
 require 'socket'
 require 'pry'

@@ -1,0 +1,18 @@
+Style/Documentation:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - 'Gemfile'
+    - 'spec/spec_helper.rb'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'config/**/*'
+    - 'vcr_cassettes/**/*'
+    - 'tmp/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'Rakefile'
+    - '**/*.rake'
+    - 'spec/**/*.rb'
