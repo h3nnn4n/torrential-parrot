@@ -18,8 +18,6 @@ class BaseTracker
     @listen_port = 6881
     @wanted_peers = 10
 
-    @announce_interval = nil
-
     logger.info "peer_id: #{peer_id}"
     logger.info "tracker: #{tracker_s}"
 

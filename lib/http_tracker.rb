@@ -31,10 +31,10 @@ class HttpTracker < BaseTracker
 
     data = response.body.bdecode
 
-    n_peers = data['complete']
-    n_leechers = data['incomplete']
-    n_done = data['downloaded']
-    announce_interval = data['interval']
+    # n_peers = data['complete']
+    # n_leechers = data['incomplete']
+    # n_done = data['downloaded']
+    # announce_interval = data['interval']
     peers = data['peers']
 
     decode_peers(peers)
