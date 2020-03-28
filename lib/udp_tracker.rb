@@ -78,10 +78,12 @@ class UdpTracker < BaseTracker
       0,                             # 32-bit integer - event
       0,                             # 32-bit integer - ip address, 0 is default
       key_id,                        # 32-bit integer key
-      4,                             # 32-bit integer - desired number of peers
+      @wanted_peers,                 # 32-bit integer - desired number of peers
       listen_port                    # 16-bit integer - port
     ].pack('NNNNa20a20NNNNNNNNNNn')
   end
+
+  private
 
   def decode_peers(peers)
     n_peers = peers.size / 6
@@ -97,8 +99,6 @@ class UdpTracker < BaseTracker
       [ip, port]
     end
   end
-
-  private
 
   def socket
     @socket ||= begin

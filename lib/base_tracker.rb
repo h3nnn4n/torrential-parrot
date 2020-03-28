@@ -14,7 +14,7 @@ class BaseTracker
     @bytes_uploaded = 0
     @bytes_left = 0
     @listen_port = 6888
-    @wanted_peers = 4
+    @wanted_peers = 8
 
     logger.info "peer_id: #{peer_id}"
     logger.info "tracker: #{host}:#{port}"
