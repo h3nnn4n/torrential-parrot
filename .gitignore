@@ -1,1 +1,2 @@
 *.torrent
+*.dat # Used for debugging
