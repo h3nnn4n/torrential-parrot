@@ -30,7 +30,6 @@ class PeerConnection
       Thread.exit unless send_handshake
 
       loop do
-        # response = socket.gets.chomp
         ready = IO.select([socket], nil, nil)
 
         next unless ready
