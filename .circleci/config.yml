@@ -22,3 +22,17 @@ jobs:
                               --out test_results/rspec.xml \
                               --format progress \
                               $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+
+  rubocop:
+    docker:
+      - image: circleci/ruby:2.6.0
+    steps:
+      - checkout
+
+      - run:
+          name: Bundle Install
+          command: gem install bundler:2.1.2 && bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+
+      - run:
+          name: Lint with rubocop
+          command: bundle exec rubocop
