@@ -12,6 +12,13 @@ class Torrent
     @bdata['announce']
   end
 
+  def size
+    @size ||= begin
+                @bdata['info']['length'] ||
+                  @bdata['info']['files'].map { |file| file['length'] }.sum
+              end
+  end
+
   def info_hash
     @info_hash ||= begin
       starter_index = @raw_data.index('4:info') + 6

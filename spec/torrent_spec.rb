@@ -17,10 +17,29 @@ RSpec.describe Torrent do
       expect(torrent.info_hash).to eq(info_hash)
     end
   end
+
+  describe '#size' do
+    it 'returns the total file size for single file torrent' do
+      expect(torrent.size).to eq(42)
+    end
+
+    it 'returns the total file size for multiple files torrent' do
+      expect(torrent2.size).to eq(44)
+    end
+  end
 end
 
 def torrent
   filepath = 'files/potato.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end
+
+def torrent2
+  filepath = 'files/parrots.torrent'
 
   data = File.read(filepath)
   torrent_info = BEncode.load(data)
