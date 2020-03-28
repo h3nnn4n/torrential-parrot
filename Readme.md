@@ -1,5 +1,7 @@
 # Torrent Parrot
 
+[![CircleCI](https://circleci.com/gh/h3nnn4n/torrent-parrot.svg?style=svg)](https://app.circleci.com/pipelines/github/h3nnn4n/torrent-parrot?branch=master)
+
 A ruby bittorrent client for celebrating parrots
 
 # License
