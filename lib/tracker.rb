@@ -10,7 +10,7 @@ require_relative 'udp_tracker'
 class Tracker
   extend Forwardable
 
-  def_delegators :middleware, :connect, :announce
+  def_delegators :middleware, :connect, :announce, :peer_id
 
   def initialize(tracker_s)
     @tracker_s = tracker_s
