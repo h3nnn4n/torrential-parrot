@@ -16,8 +16,10 @@ class PeerFactory
     peers = []
 
     @trackers.each do |tracker|
-      tracker.connect
+      next unless tracker.connect
+
       peer_address = tracker.announce(@torrent)
+      next if peer_address == false
 
       peer_address.each do |peer|
         host = peer.first
@@ -29,6 +31,10 @@ class PeerFactory
         peers << Peer.new(host, port, @torrent.info_hash, tracker.peer_id)
       end
     end
+
+    peers.compact!
+
+    puts @peer_ips
 
     peers
   end

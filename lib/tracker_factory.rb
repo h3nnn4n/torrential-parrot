@@ -8,12 +8,15 @@ class TrackerFactory
   end
 
   def build
-    @torrent.trackers.map do |tracker_uri|
+    trackers = @torrent.trackers.map do |tracker_uri|
       uri = URI(tracker_uri)
 
       next if uri.scheme != 'udp'
 
       Tracker.new(tracker_uri)
     end
+
+    trackers.compact!
+    trackers
   end
 end

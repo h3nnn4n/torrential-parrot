@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'tracker_factory'
 require 'peer_factory'
 
 RSpec.describe PeerFactory do

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'timeout'
+
 require_relative 'base_tracker'
 
 class UdpTracker < BaseTracker
@@ -10,8 +12,24 @@ class UdpTracker < BaseTracker
     logger.info "[UDP_TRACKER] sending connect package with transaction_id #{transaction_id}"
 
     payload = connection_message(transaction_id)
-    socket.send(payload, 0)
-    response = socket.recvfrom(1024)
+    response = nil
+
+    max_retries = 4
+    (0..max_retries).each do |retry_n|
+      socket.send(payload, 0)
+
+      Timeout.timeout(0.5) do
+        response = socket.recvfrom(1024)
+      end
+    rescue Timeout::Error
+      if retry_n < max_retries
+        logger.warn "[UDP_TRACKER] timed out ##{retry_n}"
+      else
+        logger.warn '[UDP_TRACKER] giving up!'
+        return false
+      end
+    end
+
     action_r, transaction_id_r, conn0, conn1 = response.first.unpack('NNNN')
 
     @connection_id = conn0 << 32 | conn1
@@ -22,6 +40,8 @@ class UdpTracker < BaseTracker
     raise 'invalid action' unless action_r.zero?
 
     true
+  rescue SocketError, Errno::ECONNREFUSED
+    false
   end
 
   def announce(torrent)
@@ -34,8 +54,35 @@ class UdpTracker < BaseTracker
 
     payload = announce_message(transaction_id, action_id, info_hash, key_id)
 
-    socket.send(payload, 0)
-    response = socket.recvfrom(1024).first
+    logger.info "[UDP_TRACKER] sending annound with transaction_id #{transaction_id}"
+
+    response_full = nil
+    max_retries = 4
+
+    (0..max_retries).each do |retry_n|
+      socket.send(payload, 0)
+
+      Timeout.timeout(0.5) do
+        response_full = socket.recvfrom(1024)
+      end
+    rescue Timeout::Error
+      if retry_n < max_retries
+        logger.warn "[UDP_TRACKER] timed out ##{retry_n}"
+      else
+        logger.warn '[UDP_TRACKER] giving up!'
+        return false
+      end
+    end
+
+    response = response_full.first
+
+    if response.size <= 20
+      logger.warn "[UDP_TRACKER] Received a response only #{response.size} bytes long"
+      logger.warn "[UDP_TRACKER] #{response_full}"
+      logger.warn "[UDP_TRACKER] #{response.first.unpack('NNNNN')}"
+      return false
+    end
+
     header = response[0..20]
     peers = response[20..response.size]
     n_peers = peers.size / 6
@@ -50,6 +97,8 @@ class UdpTracker < BaseTracker
     logger.info "[UDP_TRACKER] received #{n_peers} of the #{@wanted_peers} requested peers"
 
     decode_peers(peers)
+  rescue SocketError, Errno::ECONNREFUSED
+    false
   end
 
   private
