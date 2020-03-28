@@ -13,12 +13,6 @@ AllCops:
     - 'tmp/**/*'
 
 Metrics/BlockLength:
-  Exclude:
-    - 'Rakefile'
-    - '**/*.rake'
-    - 'spec/**/*.rb'
-
-Metrics/BlockLength:
   Enabled: false
 Metrics/CyclomaticComplexity:
   Enabled: false
