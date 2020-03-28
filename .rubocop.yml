@@ -4,6 +4,7 @@ Style/Documentation:
 AllCops:
   Exclude:
     - 'Gemfile'
+    - 'Guardfile'
     - 'spec/spec_helper.rb'
     - 'bin/**/*'
     - 'vendor/**/*'
@@ -16,3 +17,20 @@ Metrics/BlockLength:
     - 'Rakefile'
     - '**/*.rake'
     - 'spec/**/*.rb'
+
+Metrics/BlockLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Metrics/AbcSize:
+  Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120

@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
 require 'bencode'
-require 'socket'
 require 'pry'
-require 'uri'
 
 require_relative 'torrent'
 require_relative 'tracker'
-
 
 filename = ARGV[0]
 

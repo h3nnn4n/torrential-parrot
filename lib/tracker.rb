@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require 'socket'
+require 'uri'
+
 class Tracker
   attr_reader :connection_id, :bytes_downloaded, :bytes_uploaded, :bytes_left,
-    :info, :listen_port
+              :info, :listen_port
 
   def initialize(tracker_s)
     @uri = URI(tracker_s)
