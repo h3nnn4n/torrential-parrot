@@ -34,4 +34,8 @@ class Torrent
       Digest::SHA1.hexdigest(info_data)
     end
   end
+
+  def info_hash_packed
+    [info_hash].pack('H*')
+  end
 end

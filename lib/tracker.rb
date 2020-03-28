@@ -5,6 +5,7 @@ require 'logger'
 require 'socket'
 require 'uri'
 
+require_relative 'http_tracker'
 require_relative 'udp_tracker'
 
 class Tracker
@@ -31,6 +32,8 @@ class Tracker
     case scheme
     when 'udp'
       @middleware = UdpTracker.new(@tracker_s)
+    when 'http', 'https'
+      @middleware = HttpTracker.new(@tracker_s)
     else
       raise "#{scheme} is not supported!"
     end
