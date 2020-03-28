@@ -7,10 +7,17 @@ RSpec.describe TrackerFactory do
     it 'returns a list of Trackers' do
       skip('Until I find a way to stub udp calls')
 
-      factory = TrackerFactory.new(torrent2)
+      factory = described_class.new(torrent2)
+
+      expect(factory.build).to all(be_a(Tracker))
+    end
+
+    it 'returns all elements' do
+      skip('Until I find a way to stub udp calls')
+
+      factory = described_class.new(torrent2)
 
       expect(factory.build.size).to eq(3)
-      expect(factory.build).to all(be_a(Tracker))
     end
   end
 end

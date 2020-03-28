@@ -19,14 +19,15 @@ RSpec.describe Torrent do
     end
 
     it 'returns all trackers' do
+      expect(torrent2.trackers.size).to eq(3)
+    end
+
+    it 'includes all trackers' do
       tracker_uri1 = 'udp://tracker.opentrackr.org:1337/announce'
       tracker_uri2 = 'udp://open.nyap2p.com:6969/announce'
       tracker_uri3 = 'udp://opentracker.i2p.rocks:6969/announce'
 
-      expect(torrent2.trackers.size).to eq(3)
-      expect(torrent2.trackers).to include(tracker_uri1)
-      expect(torrent2.trackers).to include(tracker_uri2)
-      expect(torrent2.trackers).to include(tracker_uri3)
+      expect(torrent2.trackers).to eq([tracker_uri1, tracker_uri2, tracker_uri3])
     end
   end
 
@@ -34,13 +35,18 @@ RSpec.describe Torrent do
     it 'returns the info_hash' do
       info_hash = '9fc6c0759cf7f7614ae25f5293d6bf7638115321'
       expect(torrent.info_hash).to eq(info_hash)
+    end
 
+    it 'returns the info_hash' do
       info_hash = 'cdae19ff30af2e5f6f71ecbab8155f384a300148'
       expect(torrent2.info_hash).to eq(info_hash)
     end
 
     it 'returns the packed info_hash' do
       expect(torrent.info_hash_packed.size).to eq(20)
+    end
+
+    it 'returns the packed info_hash' do
       expect(torrent2.info_hash_packed.size).to eq(20)
     end
   end

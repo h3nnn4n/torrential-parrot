@@ -27,7 +27,7 @@ class HttpTracker < BaseTracker
         HTTParty.get(tracker_s, query: query, timeout: 1)
       end
 
-    return false unless (200..299).include?(response.code)
+    return false unless (200..299).cover?(response.code)
 
     data = response.body.bdecode
 

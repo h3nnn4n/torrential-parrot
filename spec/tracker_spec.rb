@@ -4,20 +4,20 @@ require 'tracker'
 
 RSpec.describe Tracker do
   describe '#scheme' do
-    it 'it returns udp' do
-      tracker = Tracker.new('udp://tracker.opentrackr.org:1337/announce')
+    it 'returns udp' do
+      tracker = described_class.new('udp://tracker.opentrackr.org:1337/announce')
 
       expect(tracker.scheme).to eq('udp')
     end
 
-    it 'it returns https' do
-      tracker = Tracker.new('https://tracker.opentrackr.org:1337/announce')
+    it 'returns https' do
+      tracker = described_class.new('https://tracker.opentrackr.org:1337/announce')
 
       expect(tracker.scheme).to eq('https')
     end
 
-    it 'it returns http' do
-      tracker = Tracker.new('http://tracker.opentrackr.org:1337/announce')
+    it 'returns http' do
+      tracker = described_class.new('http://tracker.opentrackr.org:1337/announce')
 
       expect(tracker.scheme).to eq('http')
     end
@@ -25,7 +25,7 @@ RSpec.describe Tracker do
     it 'it raises exception for tcp' do
       uri = 'tcp://tracker.opentrackr.org:1337/announce'
 
-      expect { Tracker.new(uri) }.to raise_exception(RuntimeError)
+      expect { described_class.new(uri) }.to raise_exception(RuntimeError)
     end
   end
 end
