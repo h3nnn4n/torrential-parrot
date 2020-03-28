@@ -32,8 +32,11 @@ RSpec.describe Torrent do
 
   describe '#info_hash' do
     it 'returns the info_hash' do
-      info_hash = '04c24ad70a7f1bbefe347297bedc1475e6b2daf1'
+      info_hash = '9fc6c0759cf7f7614ae25f5293d6bf7638115321'
       expect(torrent.info_hash).to eq(info_hash)
+
+      info_hash = 'cdae19ff30af2e5f6f71ecbab8155f384a300148'
+      expect(torrent2.info_hash).to eq(info_hash)
     end
   end
 
