@@ -16,7 +16,7 @@ class BaseTracker
     @bytes_uploaded = 0
     @bytes_left = 0
     @listen_port = 6881
-    @wanted_peers = 10
+    @wanted_peers = 50
 
     logger.info "peer_id: #{peer_id}"
     logger.info "tracker: #{tracker_s}"
@@ -25,7 +25,8 @@ class BaseTracker
   end
 
   def peer_id
-    @peer_id ||= '-PC0001-' + (0..12).map { rand(10) }.join('')
+    # @peer_id ||= '-PC0001-' + (0..12).map { rand(10) }.join('')
+    @peer_id ||= '-PR0002-9249325825350'
   end
 
   def host

@@ -38,6 +38,11 @@ RSpec.describe Torrent do
       info_hash = 'cdae19ff30af2e5f6f71ecbab8155f384a300148'
       expect(torrent2.info_hash).to eq(info_hash)
     end
+
+    it 'returns the packed info_hash' do
+      expect(torrent.info_hash_packed.size).to eq(20)
+      expect(torrent2.info_hash_packed.size).to eq(20)
+    end
   end
 
   describe '#size' do

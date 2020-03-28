@@ -24,7 +24,7 @@ class HttpTracker < BaseTracker
 
     response =
       Retriable.retriable do
-        HTTParty.get(tracker_s, query: query, timeout: 2.5)
+        HTTParty.get(tracker_s, query: query, timeout: 1)
       end
 
     return false unless (200..299).include?(response.code)

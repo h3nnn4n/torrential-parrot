@@ -10,11 +10,13 @@ class Peer
 
   def_delegators :connection, :connect
 
-  def initialize(host, port, info_hash, peer_id)
+  def initialize(host, port, info_hash, peer_id, peer_n: nil)
     @host = host
     @port = port
     @info_hash = info_hash
     @peer_id = peer_id
+
+    @peer_n = peer_n || rand(65_535)
 
     logger.info "[PEER] Created peer #{host}:#{port}"
   end
@@ -26,7 +28,8 @@ class Peer
       @host,
       @port,
       @info_hash,
-      @peer_id
+      @peer_id,
+      peer_n: @peer_n
     )
   end
 

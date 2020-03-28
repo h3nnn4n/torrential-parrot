@@ -28,7 +28,13 @@ class PeerFactory
         next if @peer_ips.include?(host)
 
         @peer_ips << host
-        peers << Peer.new(host, port, @torrent.info_hash, tracker.peer_id)
+        peers << Peer.new(
+          host,
+          port,
+          @torrent.info_hash,
+          tracker.peer_id,
+          peer_n: @peer_ips.size - 1
+        )
       end
     end
 
