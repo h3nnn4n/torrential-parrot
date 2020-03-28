@@ -5,8 +5,8 @@ require 'socket'
 require 'uri'
 
 class BaseTracker
-  attr_reader :bytes_downloaded, :bytes_uploaded, :bytes_left,
-              :info, :listen_port
+  attr_accessor :bytes_downloaded, :bytes_uploaded, :bytes_left
+  attr_reader :info, :listen_port
 
   def initialize(tracker_s)
     @uri = URI(tracker_s)

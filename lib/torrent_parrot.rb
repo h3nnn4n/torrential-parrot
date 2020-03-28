@@ -15,6 +15,6 @@ torrent = Torrent.new(torrent_info, data)
 tracker = Tracker.new(torrent.main_tracker)
 
 tracker.connect
-tracker.announce(torrent.info_hash)
+tracker.announce(torrent)
 
 nil

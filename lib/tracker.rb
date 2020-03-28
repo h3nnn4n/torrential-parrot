@@ -15,6 +15,8 @@ class Tracker
   def initialize(tracker_s)
     @tracker_s = tracker_s
     @uri = URI(tracker_s)
+
+    middleware
   end
 
   def scheme
@@ -29,6 +31,8 @@ class Tracker
     case scheme
     when 'udp'
       @middleware = UdpTracker.new(@tracker_s)
+    else
+      raise "#{scheme} is not supported!"
     end
   end
 end

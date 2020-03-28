@@ -24,10 +24,13 @@ class UdpTracker < BaseTracker
     true
   end
 
-  def announce(info_hash)
+  def announce(torrent)
+    info_hash = torrent.info_hash
     transaction_id = rand(2**16)
     key_id = rand(2**16)
     action_id = 1
+
+    @bytes_left = torrent.size
 
     payload = announce_message(transaction_id, action_id, info_hash, key_id)
 
@@ -48,6 +51,8 @@ class UdpTracker < BaseTracker
 
     decode_peers(peers)
   end
+
+  private
 
   def connection_message(transaction_id = nil)
     transaction_id = rand(2**32) if transaction_id.nil?
@@ -82,8 +87,6 @@ class UdpTracker < BaseTracker
       listen_port                    # 16-bit integer - port
     ].pack('NNNNa20a20NNNNNNNNNNn')
   end
-
-  private
 
   def decode_peers(peers)
     n_peers = peers.size / 6
