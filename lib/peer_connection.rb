@@ -120,9 +120,11 @@ class PeerConnection
 
   def process_message(payload)
     @message_count += 1
-    logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
 
     case message_type(payload)
+    when :keep_alive
+      process_keepalive(payload)
     when :choke
       process_choke(payload)
     when :unchoke
@@ -160,7 +162,9 @@ class PeerConnection
   end
 
   def message_type(raw_payload)
-    _, id = raw_payload.unpack('NC')
+    length, id = raw_payload.unpack('NC')
+
+    return :keep_alive if length.zero?
 
     case id
     when 0 then :choke
@@ -223,7 +227,7 @@ class PeerConnection
   def process_unchoke(payload)
     dump(payload, info: 'unchoke')
     @chocked = false
-    logger.info "[PEER_CONNECTION][#{@peer_n}] send unchoke"
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sent unchoke"
 
     process_message(payload[5..-1]) if payload.size > 5
   end
@@ -233,9 +237,16 @@ class PeerConnection
     _, _, piece = payload.unpack('NCN')
     @have << piece
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
 
     process_message(payload[9..-1]) if payload.size > 9
+  end
+
+  def process_keepalive(payload)
+    dump(payload, info: 'keepalive')
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
+
+    process_message(payload[4..-1]) if payload.size > 4
   end
 
   def socket
