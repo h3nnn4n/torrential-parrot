@@ -40,3 +40,21 @@ jobs:
       - run:
           name: Lint with rubocop
           command: bundle exec rubocop
+
+workflows:
+  version: 2
+
+  build-deploy:
+    jobs:
+      - rubocop:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
+      - rspec:
+          filters:
+            branches:
+              only:
+                - dev
+                - master
