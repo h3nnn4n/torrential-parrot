@@ -1,15 +1,16 @@
 version: 2.1
+
 orbs:
-  ruby: circleci/ruby@0.1.2 
+  ruby: circleci/ruby@0.1.2
 
 jobs:
-  build:
+  rspec:
     docker:
       - image: circleci/ruby:2.6.3-stretch-node
     executor: ruby/default
     steps:
       - checkout
-      
+
       - run:
           name: Bundle Install
           command: gem install bundler:2.1.2 && bundle check --path=vendor/bundle || bundle install  --jobs=4 --retry=3
