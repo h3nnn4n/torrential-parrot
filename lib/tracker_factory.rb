@@ -11,7 +11,7 @@ class TrackerFactory
     trackers = @torrent.trackers.map do |tracker_uri|
       uri = URI(tracker_uri)
 
-      next unless %w[http https udp].include?(uri.scheme)
+      next unless %w[http https].include?(uri.scheme)
 
       Tracker.new(tracker_uri)
     end
