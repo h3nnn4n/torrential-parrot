@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger'
 require 'socket'
 require 'uri'
 
@@ -22,16 +23,16 @@ class Tracker
       port
     )
 
-    puts "peer_id: #{peer_id}"
-    puts "tracker: #{host}:#{port}"
-    puts "scheme: #{scheme}"
+    logger.info "peer_id: #{peer_id}"
+    logger.info "tracker: #{host}:#{port}"
+    logger.info "scheme: #{scheme}"
 
     raise "invalid scheme #{scheme}" unless scheme == 'udp'
   end
 
   def connect
     transaction_id = rand(2**16)
-    puts "sending connect package with transaction_id #{transaction_id}"
+    logger.info "sending connect package with transaction_id #{transaction_id}"
 
     payload = connection_message(transaction_id)
     @socket.send(payload, 0)
@@ -40,7 +41,7 @@ class Tracker
 
     @connection_id = conn0 << 32 | conn1
 
-    puts "connection_id is #{@connection_id}"
+    logger.info "connection_id is #{@connection_id}"
 
     raise 'invalid transaction_id' unless transaction_id == transaction_id_r
     raise 'invalid action' unless action_r.zero?
@@ -66,9 +67,9 @@ class Tracker
     raise "got error #{response} #{action_r}" unless action_r == 1
     raise 'invalid transaction_id' unless transaction_id == transaction_id_r
 
-    puts "announce interval is #{interval}"
-    puts "leechers #{leechers} and seeders #{seeders}"
-    puts "received #{n_peers} of the #{@wanted_peers} requested peers"
+    logger.info "announce interval is #{interval}"
+    logger.info "leechers #{leechers} and seeders #{seeders}"
+    logger.info "received #{n_peers} of the #{@wanted_peers} requested peers"
 
     decode_peers(peers)
   end
@@ -116,7 +117,7 @@ class Tracker
       ip = data[0..3].join('.')
       port = data.last
 
-      puts "found peer #{index} #{ip} on port #{port}"
+      logger.info "found peer #{index} #{ip} on port #{port}"
 
       [ip, port]
     end
@@ -136,5 +137,9 @@ class Tracker
 
   def port
     @uri.port
+  end
+
+  def logger
+    @logger ||= Logger.new(STDOUT)
   end
 end
