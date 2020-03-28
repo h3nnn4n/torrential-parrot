@@ -24,6 +24,8 @@ class PeerConnection
     @keepalive_timer = Time.now.to_i
     @interested = false
     @chocked = true
+    @keepalive_count = 0
+    @message_count = 0
 
     logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
@@ -67,7 +69,7 @@ class PeerConnection
       next if response.nil? || response.empty?
 
       if @state == :handshake_sent
-        validate_handshake(response)
+        process_handshake(response)
         break
       end
     rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
@@ -85,11 +87,9 @@ class PeerConnection
       response = socket.gets unless ready.nil?
 
       if ready.nil? || response.nil? || response.empty?
-        if !@interested && @chocked
-          send_interested
-        else
-          keepalive
-        end
+        send_interested if !@interested && @chocked && @keepalive_count > 3
+
+        keepalive
 
         next
       end
@@ -97,17 +97,7 @@ class PeerConnection
       next if response.nil?
       next if response.empty?
 
-      logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(response)} -> #{response}"
-
-      case message_type(response)
-      when :have
-        process_have(response)
-      else
-        logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(response)} not supported yet"
-        File.open("#{@peer_n}.dat", 'wt') do |f|
-          f.write(response)
-        end
-      end
+      process_message(response)
     rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
            Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
            Errno::EPIPE
@@ -125,6 +115,26 @@ class PeerConnection
 
     socket.puts(keepalive_message)
     @keepalive_timer = now
+    @keepalive_count += 1
+  end
+
+  def process_message(payload)
+    @message_count += 1
+    logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
+
+    case message_type(payload)
+    when :choke
+      process_choke(payload)
+    when :unchoke
+      process_unchoke(payload)
+    when :bitfield
+      process_bitfield(payload)
+    when :have
+      process_have(payload)
+    else
+      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(payload)} not supported yet"
+      dump(payload, info: "unknown_type_#{message_type(payload)}")
+    end
   end
 
   def send_interested
@@ -168,34 +178,64 @@ class PeerConnection
     end
   end
 
-  def validate_handshake(payload)
+  def process_handshake(payload)
+    dump(payload, info: 'handshake')
+
     protocol_length = payload.unpack1('C')
     protocol = payload[1..protocol_length].unpack1('a*')
 
     raise "#{protocol} is not known!" if protocol != pstr
 
     payload = payload[(protocol_length + 1)..payload.length]
-    decoded = payload.unpack('C8H20a20')
+    decoded = payload.unpack('C8H40a20')
 
     @reserved = decoded[0..7]
     remote_info_hash, @remote_peer_id = decoded[8..-1]
 
-    # TODO: Fix this it stinks
-    raise "#{remote_info_hash} is not #{info_hash[0..19]} quiting" unless remote_info_hash == info_hash[0..19]
+    raise "#{remote_info_hash} is not #{info_hash} quiting" unless remote_info_hash == info_hash
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] handshake successful!"
+    logger.info "[PEER_CONNECTION][#{@peer_n}] handshake successful! #{payload.size}"
 
     @state = :handshaked
+
+    dump(payload, info: 'handshake_piece') if payload.size > 46
+    process_message(payload[48..-1]) if payload.size > 46
+  end
+
+  def process_bitfield(payload)
+    dump(payload, info: 'bitfield')
+    length = payload.unpack1('N')
+    bitfield_length = 4 + length
+
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sent bitfield of size #{length}"
+
+    process_message(payload[bitfield_length..-1]) if payload.size > bitfield_length
+  end
+
+  def process_choke(payload)
+    dump(payload, info: 'choke')
+    @chocked = true
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sent choke"
+
+    process_message(payload[5..-1]) if payload.size > 5
+  end
+
+  def process_unchoke(payload)
+    dump(payload, info: 'unchoke')
+    @chocked = false
+    logger.info "[PEER_CONNECTION][#{@peer_n}] send unchoke"
+
+    process_message(payload[5..-1]) if payload.size > 5
   end
 
   def process_have(payload)
-    pieces = payload.unpack('NCN*')[2..-1]
+    dump(payload, info: 'have')
+    _, _, piece = payload.unpack('NCN')
+    @have << piece
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] recieved #{pieces.count} pieces in a have message"
+    logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
 
-    pieces.each do |piece|
-      @have << piece
-    end
+    process_message(payload[9..-1]) if payload.size > 9
   end
 
   def socket
@@ -204,5 +244,11 @@ class PeerConnection
 
   def logger
     @logger ||= Logger.new(STDOUT)
+  end
+
+  def dump(data, info: '')
+    File.open("#{@peer_n}_#{@message_count}_#{info}.dat", 'wb') do |f|
+      f.write(data)
+    end
   end
 end
