@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'logger'
+require 'set'
 require 'socket'
 
 require_relative 'peer_messages'
@@ -17,49 +18,120 @@ class PeerConnection
     @my_peer_id = peer_id
     @remote_peer_id = nil
     @peer_n = peer_n || rand(65_535)
-
     @reserved = nil
-
     @state = :uninitialized
+    @have = Set.new
+    @keepalive_timer = Time.now.to_i
+    @interested = false
+    @chocked = true
 
     logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
 
   def connect
     Thread.new do
-      Thread.exit unless send_handshake
+      client_init
 
-      loop do
-        ready = IO.select([socket], nil, nil)
-
-        next unless ready
-
-        response = socket.gets
-
-        next if response.nil?
-        next if response.empty?
-
-        if @state == :handshake_sent
-          validate_handshake(response)
-          next
-        end
-
-        logger.info "[PEER_CONNECTION][#{@peer_n}] got #{response}"
-
-        case message_type(response)
-        when :handshake
-          validate_handshake(response)
-        else
-          logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(response)} not supported yet"
-        end
-      rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
-             Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL
-        break
-      end
+      # event_loop
+      listen
     end
   end
 
   private
+
+  def event_loop
+    Thread.new do
+      loop do
+        logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked}"
+        keepalive
+
+        send_interested if @state == :handshaked && !@interested && @chocked
+
+        sleep 2
+      end
+    rescue Errno::EPIPE
+      logger.info "[PEER_CONNECTION][#{@peer_n}] dropped"
+    end
+  end
+
+  def client_init
+    Thread.exit unless send_handshake
+
+    loop do
+      ready = IO.select([socket], nil, nil)
+
+      next unless ready
+
+      response = socket.gets
+
+      next if response.nil? || response.empty?
+
+      if @state == :handshake_sent
+        validate_handshake(response)
+        break
+      end
+    rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
+           Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
+           Errno::EPIPE
+      logger.info "[PEER_CONNECTION][#{@peer_n}] died"
+      Thread.exit
+    end
+  end
+
+  def listen
+    loop do
+      ready = IO.select([socket], nil, nil, 2)
+
+      response = socket.gets unless ready.nil?
+
+      if ready.nil? || response.nil? || response.empty?
+        if !@interested && @chocked
+          send_interested
+        else
+          keepalive
+        end
+
+        next
+      end
+
+      next if response.nil?
+      next if response.empty?
+
+      logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(response)} -> #{response}"
+
+      case message_type(response)
+      when :have
+        process_have(response)
+      else
+        logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(response)} not supported yet"
+        File.open("#{@peer_n}.dat", 'wt') do |f|
+          f.write(response)
+        end
+      end
+    rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
+           Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
+           Errno::EPIPE
+      logger.info "[PEER_CONNECTION][#{@peer_n}] died"
+      break
+    end
+  end
+
+  def keepalive
+    now = Time.now.to_i
+    delta = now - @keepalive_timer
+    return unless delta > 10
+
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
+
+    socket.puts(keepalive_message)
+    @keepalive_timer = now
+  end
+
+  def send_interested
+    @interested = true
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sending INTERESTED"
+    socket.puts(interested_message)
+  end
 
   def send_handshake
     @state = :sending_handshake
@@ -73,12 +145,12 @@ class PeerConnection
 
     true
   rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ENETUNREACH,
-         Errno::EHOSTUNREACH, Errno::ETIMEDOUT
+         Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::EADDRNOTAVAIL
     false
   end
 
   def message_type(raw_payload)
-    _, id = raw_payload.unpack('CN')
+    _, id = raw_payload.unpack('NC')
 
     case id
     when 0 then :choke
@@ -114,6 +186,16 @@ class PeerConnection
     logger.info "[PEER_CONNECTION][#{@peer_n}] handshake successful!"
 
     @state = :handshaked
+  end
+
+  def process_have(payload)
+    pieces = payload.unpack('NCN*')[2..-1]
+
+    logger.info "[PEER_CONNECTION][#{@peer_n}] recieved #{pieces.count} pieces in a have message"
+
+    pieces.each do |piece|
+      @have << piece
+    end
   end
 
   def socket

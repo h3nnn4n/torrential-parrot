@@ -14,9 +14,20 @@ module PeerMessages
     [0].pack('N')
   end
 
+  def choke_message
+    [1, 0].pack('NC')
+  end
+
+  def unchoke_message
+    [1, 1].pack('NC')
+  end
+
   def interested_message
-    message = [1].pack('N')
-    message << [2].pack('C')
+    [1, 2].pack('NC')
+  end
+
+  def uninterested_message
+    [1, 3].pack('NC')
   end
 
   def pstr
