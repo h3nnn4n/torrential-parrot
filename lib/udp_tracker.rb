@@ -7,7 +7,7 @@ class UdpTracker < BaseTracker
 
   def connect
     transaction_id = rand(2**16)
-    logger.info "sending connect package with transaction_id #{transaction_id}"
+    logger.info "[UDP_TRACKER] sending connect package with transaction_id #{transaction_id}"
 
     payload = connection_message(transaction_id)
     socket.send(payload, 0)
@@ -16,7 +16,7 @@ class UdpTracker < BaseTracker
 
     @connection_id = conn0 << 32 | conn1
 
-    logger.info "connection_id is #{@connection_id}"
+    logger.info "[UDP_TRACKER] connection_id is #{@connection_id}"
 
     raise 'invalid transaction_id' unless transaction_id == transaction_id_r
     raise 'invalid action' unless action_r.zero?
@@ -45,9 +45,9 @@ class UdpTracker < BaseTracker
     raise "got error #{response} #{action_r}" unless action_r == 1
     raise 'invalid transaction_id' unless transaction_id == transaction_id_r
 
-    logger.info "announce interval is #{interval}"
-    logger.info "leechers #{leechers} and seeders #{seeders}"
-    logger.info "received #{n_peers} of the #{@wanted_peers} requested peers"
+    logger.info "[UDP_TRACKER] announce interval is #{interval}"
+    logger.info "[UDP_TRACKER] leechers #{leechers} and seeders #{seeders}"
+    logger.info "[UDP_TRACKER] received #{n_peers} of the #{@wanted_peers} requested peers"
 
     decode_peers(peers)
   end
@@ -97,7 +97,7 @@ class UdpTracker < BaseTracker
       ip = data[0..3].join('.')
       port = data.last
 
-      logger.info "found peer #{index} #{ip} on port #{port}"
+      logger.info "[UDP_TRACKER] found peer #{index} #{ip} on port #{port}"
 
       [ip, port]
     end

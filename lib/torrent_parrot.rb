@@ -3,9 +3,10 @@
 require 'bencode'
 require 'pry'
 
+require_relative 'peer'
 require_relative 'torrent'
 require_relative 'tracker'
-require_relative 'peer'
+require_relative 'tracker_factory'
 
 filename = ARGV[0]
 
@@ -13,7 +14,9 @@ data = File.read(filename)
 torrent_info = BEncode.load(data)
 
 torrent = Torrent.new(torrent_info, data)
-tracker = Tracker.new(torrent.main_tracker)
+
+tracker_factory = TrackerFactory.new(torrent)
+trackers = tracker_factory.build
 
 tracker.connect
 peer_address = tracker.announce(torrent)

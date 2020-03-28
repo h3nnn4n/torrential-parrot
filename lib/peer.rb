@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fowardable'
+require 'forwardable'
 require 'logger'
 
 require_relative 'peer_connection'

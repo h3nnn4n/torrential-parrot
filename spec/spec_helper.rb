@@ -98,3 +98,24 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+require 'bencode'
+require 'torrent'
+
+def torrent
+  filepath = 'files/potato.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end
+
+def torrent2
+  filepath = 'files/parrots.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end

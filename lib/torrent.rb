@@ -12,6 +12,11 @@ class Torrent
     @bdata['announce']
   end
 
+  def trackers
+    @trackers ||=
+      @bdata['announce-list']&.flatten || [main_tracker]
+  end
+
   def size
     @size ||= begin
                 @bdata['info']['length'] ||

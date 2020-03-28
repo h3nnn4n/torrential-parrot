@@ -11,6 +11,25 @@ RSpec.describe Torrent do
     end
   end
 
+  describe '#trackers' do
+    it 'returns main tracker when "announce-list" is empty' do
+      tracker_uri = 'udp://tracker.opentrackr.org:1337/announce'
+
+      expect(torrent.trackers).to eq([tracker_uri])
+    end
+
+    it 'returns all trackers' do
+      tracker_uri1 = 'udp://tracker.opentrackr.org:1337/announce'
+      tracker_uri2 = 'udp://open.nyap2p.com:6969/announce'
+      tracker_uri3 = 'udp://opentracker.i2p.rocks:6969/announce'
+
+      expect(torrent2.trackers.size).to eq(3)
+      expect(torrent2.trackers).to include(tracker_uri1)
+      expect(torrent2.trackers).to include(tracker_uri2)
+      expect(torrent2.trackers).to include(tracker_uri3)
+    end
+  end
+
   describe '#info_hash' do
     it 'returns the info_hash' do
       info_hash = '04c24ad70a7f1bbefe347297bedc1475e6b2daf1'
@@ -27,22 +46,4 @@ RSpec.describe Torrent do
       expect(torrent2.size).to eq(44)
     end
   end
-end
-
-def torrent
-  filepath = 'files/potato.torrent'
-
-  data = File.read(filepath)
-  torrent_info = BEncode.load(data)
-
-  Torrent.new(torrent_info, data)
-end
-
-def torrent2
-  filepath = 'files/parrots.torrent'
-
-  data = File.read(filepath)
-  torrent_info = BEncode.load(data)
-
-  Torrent.new(torrent_info, data)
 end
