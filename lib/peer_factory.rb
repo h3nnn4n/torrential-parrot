@@ -40,8 +40,6 @@ class PeerFactory
 
     peers.compact!
 
-    puts @peer_ips
-
     peers
   end
 end
