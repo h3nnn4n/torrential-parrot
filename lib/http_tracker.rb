@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'timeout'
 require 'httparty'
+require 'retriable'
+require 'timeout'
 
 require_relative 'base_tracker'
 
@@ -21,7 +22,10 @@ class HttpTracker < BaseTracker
       port: @listen_port
     }
 
-    response = HTTParty.get(tracker_s, query: query, timeout: 2.5)
+    response =
+      Retriable.retriable do
+        HTTParty.get(tracker_s, query: query, timeout: 2.5)
+      end
 
     return false unless (200..299).include?(response.code)
 
@@ -34,7 +38,7 @@ class HttpTracker < BaseTracker
     peers = data['peers']
 
     decode_peers(peers)
-  rescue Net::OpenTimeout, OpenSSL::SSL::SSLError
+  rescue Net::OpenTimeout, OpenSSL::SSL::SSLError, Net::ReadTimeout
     false
   end
 end

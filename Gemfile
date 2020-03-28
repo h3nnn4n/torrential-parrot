@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'bencode', '~> 0.8.2'
 gem 'httparty'
+gem 'retriable'
 
 group :test do
   gem 'rspec-core', '~> 3.9', '>= 3.9.1'

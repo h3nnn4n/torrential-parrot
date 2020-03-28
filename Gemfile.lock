@@ -51,6 +51,7 @@ GEM
     rb-fsevent (0.10.3)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
+    retriable (3.1.2)
     rexml (3.2.4)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
@@ -92,6 +93,7 @@ DEPENDENCIES
   guard-rubocop
   httparty
   pry
+  retriable
   rspec-core (~> 3.9, >= 3.9.1)
   rspec-expectations (~> 3.9, >= 3.9.1)
   rspec-mocks (~> 3.9, >= 3.9.1)
