@@ -22,7 +22,6 @@ class PeerConnection
     @peer_n = peer_n || rand(65_535)
     @reserved = nil
     @state = :uninitialized
-    @have = Set.new
     @keepalive_timer = Time.now.to_i
     @interested = false
     @chocked = true
@@ -85,7 +84,7 @@ class PeerConnection
            Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
            Errno::EPIPE => e
 
-      if @have.size.positive? && @drops_count <= 3
+      if part_count.positive? && @drops_count <= 3
         logger.warn "[PEER_CONNECTION][#{@peer_n}] dropped #{@drops_count} times, reconnecting. cause: #{e.class}"
         reopen_socket
         @drops_count += 1
@@ -101,7 +100,7 @@ class PeerConnection
     delta = now - @keepalive_timer
     return false unless delta >= 10
 
-    logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked} #{@have.size}"
+    logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked} #{part_count}"
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
 
     socket.puts(keepalive_message)
@@ -156,7 +155,7 @@ class PeerConnection
   end
 
   def send_messages
-    return send_interested if !@interested && @have.size.positive?
+    return send_interested if !@interested && part_count.positive?
     return if keepalive
     return request_piece if !@chocked && @interested
   end
@@ -238,7 +237,7 @@ class PeerConnection
   def process_have(payload)
     dump(payload, info: 'have')
     _, _, piece = payload.unpack('NCN')
-    @have << piece
+    @bit_field.set(piece)
 
     # logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
 
@@ -250,6 +249,10 @@ class PeerConnection
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
 
     process_message(payload[4..-1]) if payload.size > 4
+  end
+
+  def part_count
+    @bit_field.bit_set_count
   end
 
   def socket
