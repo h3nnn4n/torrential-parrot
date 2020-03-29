@@ -103,7 +103,7 @@ require 'bencode'
 require 'torrent'
 
 def torrent
-  filepath = 'files/potato.torrent'
+  filepath = 'spec/files/potato.torrent'
 
   data = File.read(filepath)
   torrent_info = BEncode.load(data)
@@ -112,7 +112,7 @@ def torrent
 end
 
 def torrent2
-  filepath = 'files/parrots.torrent'
+  filepath = 'spec/files/parrots.torrent'
 
   data = File.read(filepath)
   torrent_info = BEncode.load(data)
