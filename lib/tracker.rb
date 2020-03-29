@@ -13,9 +13,10 @@ class Tracker
 
   def_delegators :middleware, :connect, :announce, :peer_id
 
-  def initialize(tracker_s)
+  def initialize(tracker_s, owner_hash)
     @tracker_s = tracker_s
     @uri = URI(tracker_s)
+    @owner_hash = owner_hash
 
     middleware
   end

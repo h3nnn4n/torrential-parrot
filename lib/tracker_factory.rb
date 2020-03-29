@@ -13,7 +13,7 @@ class TrackerFactory
 
       next unless %w[http https].include?(uri.scheme)
 
-      Tracker.new(tracker_uri)
+      Tracker.new(tracker_uri, @torrent.info_hash)
     end
 
     trackers.compact!

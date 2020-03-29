@@ -11,11 +11,12 @@ class Peer
 
   def_delegators :connection, :connect
 
-  def initialize(host, port, info_hash, peer_id, peer_n: nil)
+  def initialize(host, port, torrent, peer_id, peer_n: nil)
     @host = host
     @port = port
-    @info_hash = info_hash
+    @info_hash = torrent.info_hash
     @peer_id = peer_id
+    @torrent = torrent
 
     @peer_n = peer_n || rand(65_535)
 
@@ -28,7 +29,7 @@ class Peer
     @connection ||= PeerConnection.new(
       @host,
       @port,
-      @info_hash,
+      @torrent,
       @peer_id,
       peer_n: @peer_n
     )

@@ -31,7 +31,7 @@ class PeerFactory
         peers << Peer.new(
           host,
           port,
-          @torrent.info_hash,
+          @torrent,
           tracker.peer_id,
           peer_n: @peer_ips.size - 1
         )

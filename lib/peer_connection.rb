@@ -13,10 +13,11 @@ class PeerConnection
 
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port
 
-  def initialize(host, port, info_hash, peer_id, peer_n: nil)
+  def initialize(host, port, torrent, peer_id, peer_n: nil)
     @host = host
     @port = port
-    @info_hash = info_hash
+    @info_hash = torrent.info_hash
+    @torrent = torrent
     @my_peer_id = peer_id
     @remote_peer_id = nil
     @peer_n = peer_n || rand(65_535)
@@ -28,6 +29,9 @@ class PeerConnection
     @keepalive_count = 0
     @drops_count = 0
     @message_count = 0
+    @requested_count = 0
+    @requested_timer = Time.now.to_i
+    @bitfield = BitField.new(torrent.size)
 
     logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
@@ -100,7 +104,7 @@ class PeerConnection
     delta = now - @keepalive_timer
     return false unless delta >= 10
 
-    logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked} #{part_count}"
+    logger.debug "[#{@peer_n}] stage: #{@state}  interested: #{@interested}  chocked: #{@chocked}  part_count: #{part_count}"
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
 
     socket.puts(keepalive_message)
@@ -124,6 +128,8 @@ class PeerConnection
       process_bitfield(payload)
     when :have
       process_have(payload)
+    when :piece
+      process_piece(payload)
     when nil
       nil
     else
@@ -160,8 +166,8 @@ class PeerConnection
     return request_piece if !@chocked && @interested
   end
 
-  def message_type(raw_payload)
-    length, id = raw_payload.unpack('NC')
+  def message_type(payload)
+    length, id = payload.unpack('NC')
 
     return if length.nil?
     return :keep_alive if length.zero?
@@ -178,8 +184,29 @@ class PeerConnection
     when 8 then :cancel
     else
       logger.info "[PEER_CONNECTION][#{@peer_n}] got unkown id #{id}"
+      dump(payload, info: 'unknown')
       -10
     end
+  end
+
+  def request_piece
+    now = Time.now.to_i
+    delta = now - @requested_timer
+    return false unless delta >= 2
+
+    piece_index = @bitfield.random_set_bit_index
+    chunk_offset = 0
+    chunk_size = 2**14
+    message = request_message(piece_index, chunk_offset, chunk_size)
+
+    logger.info "[PEER_CONNECTION][#{@peer_n}] requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
+
+    socket.puts(message)
+
+    @requested_count += 1
+    @requested_timer = now
+
+    true
   end
 
   def process_handshake(payload)
@@ -211,7 +238,7 @@ class PeerConnection
     length = payload.unpack1('N')
     bitfield_length = 4 + length
 
-    @bitfield = BitField.new(payload[0..bitfield_length])
+    @bitfield.populate(payload[0..bitfield_length])
 
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent bitfield of size #{length}"
 
@@ -229,7 +256,7 @@ class PeerConnection
   def process_unchoke(payload)
     dump(payload, info: 'unchoke')
     @chocked = false
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sent unchoke"
+    logger.info "[PEER_CONNECTION][#{@peer_n}] sent UNCHOKE ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°)"
 
     process_message(payload[5..-1]) if payload.size > 5
   end
@@ -237,7 +264,7 @@ class PeerConnection
   def process_have(payload)
     dump(payload, info: 'have')
     _, _, piece = payload.unpack('NCN')
-    @bit_field.set(piece)
+    @bitfield.set(piece)
 
     # logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
 
@@ -251,8 +278,15 @@ class PeerConnection
     process_message(payload[4..-1]) if payload.size > 4
   end
 
+  def process_piece(payload)
+    dump(payload, info: 'piece')
+    logger.info "[PEER_CONNECTION][#{@peer_n}] got a piece!"
+
+    # process_message(payload[4..-1]) if payload.size > 4
+  end
+
   def part_count
-    @bit_field.bit_set_count
+    @bitfield.bit_set_count
   end
 
   def socket
