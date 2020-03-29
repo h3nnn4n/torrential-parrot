@@ -81,4 +81,11 @@ RSpec.describe BitField do
       expect(bitfield.payload_length).to eq(179)
     end
   end
+
+  describe '#bit_set_count' do
+    it 'has the correct number of bits set' do
+      bitfield = described_class.new(payload)
+      expect(bitfield.bit_set_count).to eq(1397)
+    end
+  end
 end

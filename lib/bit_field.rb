@@ -50,6 +50,10 @@ class BitField
     @bits.any? { |bit| bit }
   end
 
+  def bit_set_count
+    @bits.map { |bit| bit ? 1 : 0 }.sum
+  end
+
   private
 
   def populate
