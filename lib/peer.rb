@@ -3,6 +3,7 @@
 require 'forwardable'
 require 'logger'
 
+require_relative 'ninja_logger'
 require_relative 'peer_connection'
 
 class Peer
@@ -34,6 +35,6 @@ class Peer
   end
 
   def logger
-    @logger ||= Logger.new(STDOUT)
+    NinjaLogger.logger
   end
 end

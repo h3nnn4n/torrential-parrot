@@ -5,6 +5,7 @@ require 'set'
 require 'socket'
 
 require_relative 'bit_field'
+require_relative 'ninja_logger'
 require_relative 'peer_messages'
 
 class PeerConnection
@@ -260,7 +261,7 @@ class PeerConnection
   end
 
   def logger
-    @logger ||= Logger.new(STDOUT)
+    NinjaLogger.logger
   end
 
   def dump(data, info: '')

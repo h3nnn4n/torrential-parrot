@@ -4,6 +4,8 @@ require 'logger'
 require 'socket'
 require 'uri'
 
+require_relative 'ninja_logger'
+
 class BaseTracker
   attr_accessor :bytes_downloaded, :bytes_uploaded, :bytes_left,
                 :announce_interval, :n_peers, :n_leechers, :n_done
@@ -45,10 +47,6 @@ class BaseTracker
     @uri.to_s
   end
 
-  def logger
-    @logger ||= Logger.new(STDOUT)
-  end
-
   def decode_peers(peers)
     return [] if peers.nil?
 
@@ -64,5 +62,9 @@ class BaseTracker
 
       [ip, port]
     end
+  end
+
+  def logger
+    NinjaLogger.logger
   end
 end
