@@ -22,7 +22,7 @@ RSpec.describe Tracker do
       expect(tracker.scheme).to eq('http')
     end
 
-    it 'it raises exception for tcp' do
+    it 'raises exception for tcp' do
       uri = 'tcp://tracker.opentrackr.org:1337/announce'
 
       expect { described_class.new(uri) }.to raise_exception(RuntimeError)
