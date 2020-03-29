@@ -9,6 +9,7 @@ require_relative 'peer_factory'
 require_relative 'torrent'
 require_relative 'tracker'
 require_relative 'tracker_factory'
+require_relative 'torrent_manager'
 
 NinjaLogger.set_logger_to_stdout
 
@@ -18,6 +19,8 @@ data = File.read(filename)
 torrent_info = BEncode.load(data)
 
 torrent = Torrent.new(torrent_info, data)
+
+TorrentManager.add_torrent(torrent)
 
 tracker_factory = TrackerFactory.new(torrent)
 trackers = tracker_factory.build
