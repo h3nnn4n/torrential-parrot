@@ -13,9 +13,22 @@ RSpec.describe BitField do
       expect(bitfield.set?(0)).to be(true)
     end
 
-    it 'has bit #221 not set' do
+    it 'has bit #1309 not set' do
       bitfield = described_class.new(payload)
-      expect(bitfield.set?(221)).to be(false)
+      expect(bitfield.set?(1309)).to be(false)
+    end
+  end
+
+  describe '#any_bit_set?' do
+    it 'has at least one set bit' do
+      bitfield = described_class.new(payload)
+      expect(bitfield.any_bit_set?).to be(true)
+    end
+
+    it 'has no set bits' do
+      fake_payload = [2, 5, 0].pack('NCC')
+      bitfield = described_class.new(fake_payload)
+      expect(bitfield.any_bit_set?).to be(true)
     end
   end
 
@@ -58,7 +71,7 @@ RSpec.describe BitField do
   describe '#length' do
     it 'has the correct length' do
       bitfield = described_class.new(payload)
-      expect(bitfield.length).to eq(1425)
+      expect(bitfield.length).to eq(1428)
     end
   end
 

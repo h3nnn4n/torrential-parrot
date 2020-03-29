@@ -46,6 +46,10 @@ class BitField
     bits_set.sample
   end
 
+  def any_bit_set?
+    @bits.any? { |bit| bit }
+  end
+
   private
 
   def populate
@@ -53,7 +57,7 @@ class BitField
 
     @payload_length = payload.unpack1('N')
     bitfield_length = 4 + @payload_length
-    bytes = payload[5..bitfield_length].unpack('C*')
+    bytes = payload[4..bitfield_length].unpack('C*')
 
     bytes.each do |byte|
       byte_bits = byte.to_s(2).split('').reverse
