@@ -25,6 +25,7 @@ class PeerConnection
     @interested = false
     @chocked = true
     @keepalive_count = 0
+    @drops_count = 0
     @message_count = 0
 
     logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
@@ -40,21 +41,6 @@ class PeerConnection
   end
 
   private
-
-  def event_loop
-    Thread.new do
-      loop do
-        logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked}"
-        keepalive
-
-        send_interested if @state == :handshaked && !@interested && @chocked
-
-        sleep 2
-      end
-    rescue Errno::EPIPE
-      logger.info "[PEER_CONNECTION][#{@peer_n}] dropped"
-    end
-  end
 
   def client_init
     Thread.exit unless send_handshake
@@ -75,7 +61,7 @@ class PeerConnection
     rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
            Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
            Errno::EPIPE
-      logger.info "[PEER_CONNECTION][#{@peer_n}] died"
+      logger.info "[PEER_CONNECTION][#{@peer_n}] died during handshake RIP"
       Thread.exit
     end
   end
@@ -87,8 +73,7 @@ class PeerConnection
       response = socket.gets unless ready.nil?
 
       if ready.nil? || response.nil? || response.empty?
-        send_interested if !@interested && @chocked && @keepalive_count > 3
-
+        send_interested if !@interested && @have.size.positive?
         keepalive
 
         next
@@ -100,17 +85,25 @@ class PeerConnection
       process_message(response)
     rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ETIMEDOUT,
            Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL,
-           Errno::EPIPE
-      logger.info "[PEER_CONNECTION][#{@peer_n}] died"
-      break
+           Errno::EPIPE => e
+
+      if @have.size.positive? && @drops_count <= 3
+        logger.warn "[PEER_CONNECTION][#{@peer_n}] dropped #{@drops_count} times, reconnecting. cause: #{e.class}"
+        reopen_socket
+        @drops_count += 1
+      else
+        logger.warn "[PEER_CONNECTION][#{@peer_n}] died RIP"
+        break
+      end
     end
   end
 
   def keepalive
     now = Time.now.to_i
     delta = now - @keepalive_timer
-    return unless delta > 10
+    return unless delta >= 10
 
+    logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked} #{@have.size}"
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
 
     socket.puts(keepalive_message)
@@ -133,6 +126,8 @@ class PeerConnection
       process_bitfield(payload)
     when :have
       process_have(payload)
+    when nil
+      nil
     else
       logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(payload)} not supported yet"
       dump(payload, info: "unknown_type_#{message_type(payload)}")
@@ -140,9 +135,9 @@ class PeerConnection
   end
 
   def send_interested
-    @interested = true
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending INTERESTED"
     socket.puts(interested_message)
+    @interested = true
   end
 
   def send_handshake
@@ -164,6 +159,7 @@ class PeerConnection
   def message_type(raw_payload)
     length, id = raw_payload.unpack('NC')
 
+    return if length.nil?
     return :keep_alive if length.zero?
 
     case id
@@ -211,6 +207,8 @@ class PeerConnection
     length = payload.unpack1('N')
     bitfield_length = 4 + length
 
+    @have << -1
+
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent bitfield of size #{length}"
 
     process_message(payload[bitfield_length..-1]) if payload.size > bitfield_length
@@ -251,6 +249,10 @@ class PeerConnection
 
   def socket
     @socket ||= TCPSocket.new(@host, @port)
+  end
+
+  def reopen_socket
+    @socket = TCPSocket.new(@host, @port)
   end
 
   def logger
