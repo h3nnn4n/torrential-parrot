@@ -21,6 +21,14 @@ RSpec.describe BitField do
     end
   end
 
+  describe '#random_set_bit_index' do
+    it 'returns the index of a set bit' do
+      index = bitfield.random_set_bit_index
+
+      expect(bitfield.set?(index)).to be(true)
+    end
+  end
+
   describe '#length' do
     it 'has the correct length' do
       expect(bitfield.length).to eq(1425)

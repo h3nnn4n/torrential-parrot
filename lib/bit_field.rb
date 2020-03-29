@@ -18,6 +18,16 @@ class BitField
     bits[index]
   end
 
+  def random_set_bit_index
+    bits_set = @bits.map.with_index do |bit, index|
+      index if bit
+    end
+
+    bits_set.compact!
+
+    bits_set.sample
+  end
+
   private
 
   def populate
