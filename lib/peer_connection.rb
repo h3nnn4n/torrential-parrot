@@ -35,9 +35,7 @@ class PeerConnection
   def connect
     Thread.new do
       client_init
-
-      # event_loop
-      listen
+      event_loop
     end
   end
 
@@ -67,16 +65,14 @@ class PeerConnection
     end
   end
 
-  def listen
+  def event_loop
     loop do
-      ready = IO.select([socket], nil, nil, 2)
+      ready = IO.select([socket], nil, nil, 1)
 
       response = socket.gets unless ready.nil?
 
       if ready.nil? || response.nil? || response.empty?
-        send_interested if !@interested && @have.size.positive?
-        keepalive
-
+        send_messages
         next
       end
 
@@ -102,7 +98,7 @@ class PeerConnection
   def keepalive
     now = Time.now.to_i
     delta = now - @keepalive_timer
-    return unless delta >= 10
+    return false unless delta >= 10
 
     logger.info "[#{@peer_n}] #{@state} #{@interested} #{@chocked} #{@have.size}"
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
@@ -110,6 +106,7 @@ class PeerConnection
     socket.puts(keepalive_message)
     @keepalive_timer = now
     @keepalive_count += 1
+    true
   end
 
   def process_message(payload)
@@ -155,6 +152,12 @@ class PeerConnection
   rescue Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ENETUNREACH,
          Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Errno::EADDRNOTAVAIL
     false
+  end
+
+  def send_messages
+    return send_interested if !@interested && @have.size.positive?
+    return if keepalive
+    return request_piece if !@chocked && @interested
   end
 
   def message_type(raw_payload)
