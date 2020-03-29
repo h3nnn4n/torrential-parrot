@@ -4,6 +4,7 @@ require 'logger'
 require 'set'
 require 'socket'
 
+require_relative 'bit_field'
 require_relative 'peer_messages'
 
 class PeerConnection
@@ -207,7 +208,7 @@ class PeerConnection
     length = payload.unpack1('N')
     bitfield_length = 4 + length
 
-    @have << -1
+    @bitfield = BitField.new(payload[0..bitfield_length])
 
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent bitfield of size #{length}"
 
