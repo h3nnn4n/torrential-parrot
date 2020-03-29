@@ -42,11 +42,11 @@ RSpec.describe Torrent do
       expect(torrent2.info_hash).to eq(info_hash)
     end
 
-    it 'returns the packed info_hash' do
+    it 'returns the packed info_hash for torrent' do
       expect(torrent.info_hash_packed.size).to eq(20)
     end
 
-    it 'returns the packed info_hash' do
+    it 'returns the packed info_hash for torrent2' do
       expect(torrent2.info_hash_packed.size).to eq(20)
     end
   end
