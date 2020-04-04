@@ -4,7 +4,7 @@ module PeerMessages
   def handshake_message
     message = [pstrlen].pack('C')
     message << [pstr].pack('a19')
-    message << [0, 0, 0, 0, 0, 0, 0, 0].pack('C8')
+    message << reserved.pack('C8')
     message << [info_hash].pack('H*')
     message << [my_peer_id].pack('a20')
     message
