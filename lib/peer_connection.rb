@@ -11,7 +11,8 @@ require_relative 'peer_messages'
 class PeerConnection
   include PeerMessages
 
-  attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port, :state
+  attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
+              :state, :chocked
 
   def initialize(host, port, torrent, peer_id, peer_n: nil)
     @host = host
@@ -52,7 +53,7 @@ class PeerConnection
   def keepalive
     now = Time.now.to_i
     delta = now - @keepalive_timer
-    return false unless delta >= 10
+    return false unless delta >= 60
 
     logger.debug "[#{@peer_n}] stage: #{@state}  interested: #{@interested}  " \
                  "chocked: #{@chocked}  part_count: #{part_count}"
@@ -66,7 +67,7 @@ class PeerConnection
 
   def process_message(payload)
     @message_count += 1
-    logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
 
     case message_type(payload)
     when :keep_alive
@@ -127,6 +128,9 @@ class PeerConnection
     return send_interested if !@interested && part_count.positive?
     return if keepalive
     return request_piece if !@chocked && @interested
+  rescue Errno::ECONNRESET, Errno::ENETUNREACH, Errno::ETIMEDOUT,
+         Errno::EPIPE
+    @state = :dead
   end
 
   def message_type(payload)

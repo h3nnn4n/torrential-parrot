@@ -3,10 +3,11 @@
 require_relative 'ninja_logger'
 
 class PeerManager
-  MAX_CONNECTIONS = 4
+  MAX_CONNECTIONS = 8
 
   def initialize
     @peers = []
+    @msg_count = 0
   end
 
   def add_peer(peer)
@@ -22,18 +23,24 @@ class PeerManager
     return if sockets.nil?
     return if sockets.empty?
 
-    ready_to_read, = IO.select(sockets, nil, nil)
-    logger.info "#{ready_to_read.size} messages to read #{ready_to_read}"
+    ready_to_read, = IO.select(sockets, nil, nil, 2)
+    # logger.info "#{ready_to_read.size} messages to read #{ready_to_read}"
+
+    return if ready_to_read.nil?
 
     ready_to_read.each do |socket|
       read_and_delegate(socket)
     end
   end
 
+  def send_messages
+    unchoked.each(&:send_messages)
+  end
+
   def print_status
     data = [
       "u: #{uninitialized.count} ",
-      "c: #{connected.count}/#{MAX_CONNECTIONS}",
+      "c: #{connected.count}/#{unchoked.count}/#{MAX_CONNECTIONS}",
       "dead: #{dead_peers.count}",
       "a:#{@peers.count}"
     ]
@@ -60,7 +67,10 @@ class PeerManager
       break
     end
 
-    delegate_message(socket, data) if data.size.positive?
+    if data.size.positive?
+      logger.info "got message of size #{data.size}"
+      delegate_message(socket, data) if data.size.positive?
+    end
   end
 
   def delegate_message(socket, payload)
@@ -75,6 +85,12 @@ class PeerManager
     @peers.find do |peer|
       peer.connection.socket_open? && peer.connection.socket == socket
     end
+  end
+
+  def unchoked
+    @peers
+      .map(&:connection)
+      .select { |a| a.state == :handshaked && a.chocked == false }
   end
 
   def connected
