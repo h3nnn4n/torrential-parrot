@@ -47,14 +47,4 @@ workflows:
   build-deploy:
     jobs:
       - rubocop:
-          filters:
-            branches:
-              only:
-                - dev
-                - master
       - rspec:
-          filters:
-            branches:
-              only:
-                - dev
-                - master
