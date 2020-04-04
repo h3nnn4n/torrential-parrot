@@ -29,6 +29,7 @@ RSpec.describe HttpTracker do
       tracker = described_class.new(tracker_url)
 
       allow(tracker).to receive(:peer_id).and_return('-PC0001-200367928925')
+      allow(tracker).to receive(:wanted_peers).and_return(50)
 
       VCR.use_cassette 'http_tracker/announce_debian' do
         expect(tracker.announce(torrent_debian)).to include(['180.150.6.209', 56_734])

@@ -18,8 +18,8 @@ class HttpTracker < BaseTracker
       info_hash: torrent.info_hash_packed,
       compact: 1,
       peer_id: [peer_id].pack('a20'),
-      numwant: @wanted_peers,
-      port: @listen_port
+      numwant: wanted_peers,
+      port: listen_port
     }
 
     response =

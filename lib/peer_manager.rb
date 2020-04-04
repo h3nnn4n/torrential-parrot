@@ -67,10 +67,10 @@ class PeerManager
       break
     end
 
-    if data.size.positive?
-      logger.info "got message of size #{data.size}"
-      delegate_message(socket, data) if data.size.positive?
-    end
+    return unless data.size.positive?
+
+    logger.info "got message of size #{data.size}"
+    delegate_message(socket, data) if data.size.positive?
   end
 
   def delegate_message(socket, payload)

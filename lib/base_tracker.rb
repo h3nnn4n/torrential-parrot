@@ -9,7 +9,7 @@ require_relative 'ninja_logger'
 class BaseTracker
   attr_accessor :bytes_downloaded, :bytes_uploaded, :bytes_left,
                 :announce_interval, :n_peers, :n_leechers, :n_done
-  attr_reader :info, :listen_port, :tracker_s
+  attr_reader :info, :listen_port, :tracker_s, :wanted_peers
 
   def initialize(tracker_s)
     @tracker_s = tracker_s
