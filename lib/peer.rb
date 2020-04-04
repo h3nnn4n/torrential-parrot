@@ -9,7 +9,9 @@ require_relative 'peer_connection'
 class Peer
   extend Forwardable
 
-  def_delegators :connection, :connect
+  def_delegators :connection, :connect, :socket, :process_message
+
+  attr_reader :peer_n
 
   def initialize(host, port, torrent, peer_id, peer_n: nil)
     @host = host
@@ -20,10 +22,8 @@ class Peer
 
     @peer_n = peer_n || rand(65_535)
 
-    logger.info "[PEER] Created peer #{host}:#{port}"
+    # logger.info "[PEER] Created peer #{host}:#{port}"
   end
-
-  private
 
   def connection
     @connection ||= PeerConnection.new(
@@ -34,6 +34,8 @@ class Peer
       peer_n: @peer_n
     )
   end
+
+  private
 
   def logger
     NinjaLogger.logger
