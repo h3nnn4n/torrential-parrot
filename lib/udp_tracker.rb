@@ -8,7 +8,6 @@ class UdpTracker < BaseTracker
   attr_reader :connection_id
 
   def connect
-    transaction_id = rand(2**16)
     logger.info "[UDP_TRACKER] sending connect package with transaction_id #{transaction_id}"
 
     payload = connection_message(transaction_id)
@@ -36,7 +35,7 @@ class UdpTracker < BaseTracker
 
     logger.info "[UDP_TRACKER] connection_id is #{@connection_id}"
 
-    raise 'invalid transaction_id' unless transaction_id == transaction_id_r
+    return false unless transaction_id == transaction_id_r
     raise 'invalid action' unless action_r.zero?
 
     true
@@ -146,5 +145,9 @@ class UdpTracker < BaseTracker
                   )
                   s
                 end
+  end
+
+  def transaction_id
+    @transaction_id ||= rand(2**16)
   end
 end
