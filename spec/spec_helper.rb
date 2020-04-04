@@ -119,3 +119,21 @@ def torrent2
 
   Torrent.new(torrent_info, data)
 end
+
+def torrent_debian
+  filepath = 'spec/files/debian.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end
+
+def torrent_archlinux
+  filepath = 'spec/files/archlinux.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end
