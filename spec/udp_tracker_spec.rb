@@ -8,6 +8,19 @@ RSpec.describe UdpTracker do
   end
 
   describe 'connect' do
+    it 'receives a connection_id' do
+      tracker_url = 'udp://tracker.opentrackr.org:1337/announce'
+      tracker = described_class.new(tracker_url)
+
+      socket = double(send: true, recvfrom: connect_payload)
+      allow(tracker).to receive(:socket).and_return(socket)
+      allow(tracker).to receive(:transaction_id).and_return(63_040) # Random
+
+      tracker.connect
+
+      expect(tracker.connection_id).to eq(0x92804b684d0725d8)
+    end
+
     it 'returns true on success' do
       tracker_url = 'udp://tracker.opentrackr.org:1337/announce'
       tracker = described_class.new(tracker_url)
