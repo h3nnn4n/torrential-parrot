@@ -45,7 +45,6 @@ class UdpTracker < BaseTracker
 
   def announce(torrent)
     info_hash = torrent.info_hash
-    transaction_id = rand(2**16)
     key_id = rand(2**16)
     action_id = 1
 
@@ -88,8 +87,8 @@ class UdpTracker < BaseTracker
 
     action_r, transaction_id_r, interval, leechers, seeders = header.unpack('NNNNN')
 
+    return false unless transaction_id == transaction_id_r
     raise "got error #{response} #{action_r}" unless action_r == 1
-    raise 'invalid transaction_id' unless transaction_id == transaction_id_r
 
     logger.info "[UDP_TRACKER] announce interval is #{interval}"
     logger.info "[UDP_TRACKER] leechers #{leechers} and seeders #{seeders}"
