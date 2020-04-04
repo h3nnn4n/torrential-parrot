@@ -53,12 +53,14 @@ class BaseTracker
     n_peers = peers.size / 6
     unpacker = 'CCCCn'
 
+    logger.info "[TRACKER] found #{n_peers} peers"
+
     (0..n_peers - 1).map do |index|
       data = peers[(index * 6)..((index * 6) + 5)].unpack(unpacker)
       ip = data[0..3].join('.')
       port = data.last
 
-      logger.info "[UDP_TRACKER] found peer #{index} #{ip} on port #{port}"
+      # logger.info "[TRACKER] found peer #{index} #{ip} on port #{port}"
 
       [ip, port]
     end

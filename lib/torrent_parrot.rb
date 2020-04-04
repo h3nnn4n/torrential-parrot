@@ -6,6 +6,7 @@ require 'pry'
 require_relative 'ninja_logger'
 require_relative 'peer'
 require_relative 'peer_factory'
+require_relative 'peer_manager'
 require_relative 'torrent'
 require_relative 'tracker'
 require_relative 'tracker_factory'
@@ -28,6 +29,15 @@ trackers = tracker_factory.build
 peer_factory = PeerFactory.new(trackers, torrent)
 peers = peer_factory.build
 
-peers.map(&:connect).map(&:join)
+peer_manager = PeerManager.new
+peers.each { |peer| peer_manager.add_peer(peer) }
+
+loop do
+  peer_manager.print_status
+  break if peers.size.zero?
+
+  peer_manager.read_and_dispatch_messages
+  sleep 0.2
+end
 
 nil
