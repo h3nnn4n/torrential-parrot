@@ -32,18 +32,12 @@ peers = peer_factory.build
 peer_manager = PeerManager.new
 peers.each { |peer| peer_manager.add_peer(peer) }
 
-c = 0
-
 loop do
   peer_manager.print_status
   break if peers.size.zero?
 
   peer_manager.read_and_dispatch_messages
   sleep 0.2
-
-  c += 1
-
-  break if c > 20
 end
 
 nil
