@@ -10,6 +10,8 @@ group :test do
   gem 'rspec-mocks', '~> 3.9', '>= 3.9.1'
   gem 'rubocop-rspec', '~> 1.38', '>= 1.38.1'
   gem 'rspec_junit_formatter'
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :development do

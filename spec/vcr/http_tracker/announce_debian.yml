@@ -1,0 +1,35 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://bttracker.debian.org:6969/announce?compact=1&info_hash=Z%80b%C0v%FA%85%E8%05dQ%C0%D9%AA%044%9A%E2y%09&numwant=50&peer_id=-PC0001-200367928925&port=6881
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - mimosa
+      Connection:
+      - Close
+      Content-Length:
+      - '338'
+      Content-Type:
+      - text/plain
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ZDg6aW50ZXJ2YWxpOTAwZTU6cGVlcnMzMDA6S38OjMw0p1gKXEObV9H8VcjVY+fgTh1MGH0zu8iorf7ekgAAz+dSZSMnUpDAB/DuLzcY+BsvsHgP/hsPvtKAE8jVLyVwjnkYVBCLBcAIGB3RnRrhVdjtNMjVU9hfncjVUhbzvyMnKVoqOxrhbWqP7kGkvPJn8hrhSRVpm/fKwIMshexVUfC5niMvdPvB6dAVLQzcxcjVXI5YbsjVXuVmclN8UF9cokHxvNqdYJhlsYDFnWUd3prkN/CaVsMUPMjVUkBvnPeyWamBqbb73PAg9RsXVd7cwMjVWE35qQSq32o6Idrg1dumIET2UkCXD6R0o6wt0MAAWMjW4aYhV1xrPft4S4SsmcjVTEWQP8jVUPEAQSMncKoL5UHxW1osGemetJYG0d2eLrx7f8LWNjpwZWVyczYwOmU=
+    http_version: null
+  recorded_at: Sat, 04 Apr 2020 19:47:38 GMT
+recorded_with: VCR 5.1.0

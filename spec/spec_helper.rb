@@ -99,6 +99,13 @@ RSpec.configure do |config|
 =end
 end
 
+require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'spec/vcr'
+  c.hook_into :webmock
+end
+
 require 'bencode'
 require 'torrent'
 
