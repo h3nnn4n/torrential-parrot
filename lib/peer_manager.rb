@@ -15,7 +15,7 @@ class PeerManager
   end
 
   def read_and_dispatch_messages
-    if connected.count < MAX_CONNECTIONS
+    if connected.count < MAX_CONNECTIONS && uninitialized.size.positive?
       peer = uninitialized.first
       peer.send_handshake
     end
