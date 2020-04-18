@@ -31,7 +31,7 @@ module PeerMessages
   end
 
   def request_message(piece_index, block_offset, block_length)
-    message = [13, 1].pack('NC')
+    message = [13, 6].pack('NC')
     message << [piece_index, block_offset, block_length].pack('NNN')
     message
   end

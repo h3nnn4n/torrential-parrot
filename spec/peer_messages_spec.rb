@@ -39,4 +39,34 @@ describe PeerMessages do
       expect(message.unpack(unpacker)).to eq(handshake_message.unpack(unpacker))
     end
   end
+
+  describe '#request_message' do
+    it 'has the correct length' do
+      message = messager.request_message(0, 0, 2**14)
+
+      expect(message.length).to eq(17)
+    end
+
+    it 'has the correct payload size' do
+      message = messager.request_message(0, 0, 2**14)
+
+      expect(message.unpack1('N')).to eq(13)
+    end
+
+    it 'has the correct message id' do
+      message = messager.request_message(0, 0, 2**14)
+
+      _, message_id = message.unpack('NC')
+
+      expect(message_id).to eq(6)
+    end
+
+    it 'has the correct piece specification' do
+      message = messager.request_message(1387, 2 * 2**14, 2**14)
+
+      _, _, piece_index, block_offset, block_length = message.unpack('NCNNN')
+
+      expect([piece_index, block_offset, block_length]).to eq([1387, 2 * 2**14, 2**14])
+    end
+  end
 end
