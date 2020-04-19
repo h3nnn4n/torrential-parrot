@@ -69,7 +69,7 @@ class PeerConnection
 
   def process_message(payload)
     @message_recv_count += 1
-    logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
 
     case message_type(payload)
     when :keep_alive
