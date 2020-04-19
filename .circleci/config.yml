@@ -44,7 +44,7 @@ jobs:
           path: coverage
 
       - codecov/upload:
-          file: coverage
+          file: coverage/.resultset.json
 
   rubocop:
     docker:
