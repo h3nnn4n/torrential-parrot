@@ -23,8 +23,13 @@ torrent = Torrent.new(torrent_info, data)
 
 TorrentManager.add_torrent(torrent)
 
-tracker_factory = TrackerFactory.new(torrent)
-trackers = tracker_factory.build
+# tracker_factory = TrackerFactory.new(torrent)
+# trackers = tracker_factory.build
+
+tracker = Tracker.new(
+  'http://tracker.opentrackr.org:1337/announce',
+  torrent.info_hash
+)
 
 # peer_factory = PeerFactory.new(trackers, torrent)
 # peers = peer_factory.build
@@ -32,7 +37,7 @@ trackers = tracker_factory.build
 peer_manager = PeerManager.new
 # peers.each { |peer| peer_manager.add_peer(peer) }
 
-peer_id = trackers.first.peer_id
+peer_id = tracker.peer_id
 peer_manager.add_peer(Peer.new('127.0.0.1', 51_413, torrent, peer_id, peer_n: 1))
 
 loop do
