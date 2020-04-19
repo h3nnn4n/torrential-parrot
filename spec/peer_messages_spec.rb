@@ -62,11 +62,11 @@ describe PeerMessages do
     end
 
     it 'has the correct piece specification' do
-      message = messager.request_message(1387, 2 * 2**14, 2**14)
+      message = messager.request_message(0, 212_992, 16_384)
 
       _, _, piece_index, block_offset, block_length = message.unpack('NCNNN')
 
-      expect([piece_index, block_offset, block_length]).to eq([1387, 2 * 2**14, 2**14])
+      expect([piece_index, block_offset, block_length]).to eq([0, 212_992, 16_384])
     end
   end
 end
