@@ -39,6 +39,7 @@ peer_manager = PeerManager.new
 
 peer_id = tracker.peer_id
 peer_manager.add_peer(Peer.new('127.0.0.1', 51_413, torrent, peer_id, peer_n: 1))
+peer_manager.add_peer(Peer.new('192.168.0.103', 50_000, torrent, peer_id, peer_n: 2))
 
 loop do
   peer_manager.print_status

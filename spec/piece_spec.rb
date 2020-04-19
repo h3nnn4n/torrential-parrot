@@ -121,6 +121,31 @@ RSpec.describe Piece do
       expect(piece.completed?).to be(false)
     end
 
+    it 'returns false if everything is pending' do
+      piece = described_class.new(16_384 * 4, 0)
+
+      (0..3).each do |i|
+        piece.request_chunk(16_384 * i)
+      end
+
+      expect(piece.completed?).to be(false)
+    end
+
+    it 'returns false if there is a chunk missing and another pending' do
+      piece = described_class.new(16_384 * 4, 0)
+
+      (0..2).each do |i|
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
+      end
+
+      expect(piece.completed?).to be(false)
+
+      piece.request_chunk(16_384 * 3)
+
+      expect(piece.completed?).to be(false)
+    end
+
     it 'returns true if all chunks are present' do
       piece = described_class.new(16_384 * 4, 0)
 
@@ -130,6 +155,19 @@ RSpec.describe Piece do
       end
 
       expect(piece.completed?).to be(true)
+    end
+
+    it 'returns false if piece is reset' do
+      piece = described_class.new(16_384 * 4, 0)
+
+      (0..3).each do |i|
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
+      end
+
+      piece.reset_chunks
+
+      expect(piece.completed?).to be(false)
     end
   end
 
@@ -180,6 +218,14 @@ RSpec.describe Piece do
         piece.receive_chunk(16_384, file_chunks[1])
 
         expect(piece.integrity_check).to be(true)
+      end
+
+      it 'fails on a chunk piece' do
+        piece = described_class.new(16_384 * 4, 0)
+        piece.piece_hash = torrent_pi6.hash_for_piece(0)
+        piece.request_chunk(0)
+
+        expect(piece.integrity_check).to be(false)
       end
     end
   end

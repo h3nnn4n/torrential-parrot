@@ -85,13 +85,19 @@ class PieceManager
   end
 
   def print_status
+    piece_indexes_failing_hash = []
+    @pieces.each_value do |piece|
+      piece_indexes_failing_hash << piece.index unless piece.integrity_check
+    end
+
     data = [
       '[TRANSFER_STATUS]',
       "t: #{number_of_pieces} ",
       "c: #{completed_count} ",
       "m: #{missing_count} ",
       "p: #{pending_chunks_count} ",
-      "%: #{(completed_count.to_f / number_of_pieces * 100.0).round(2)}% "
+      "%: #{(completed_count.to_f / number_of_pieces * 100.0).round(2)}% ",
+      "f: #{piece_indexes_failing_hash} "
     ]
 
     msg = data.join(' ')

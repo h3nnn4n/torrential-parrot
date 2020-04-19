@@ -55,6 +55,14 @@ RSpec.describe PieceManager do
   end
 
   describe '#incomplete_piece' do
+    def file_chunks
+      file = File.read('spec/files/downloads/pi6.txt')
+
+      data = []
+      data << file.slice!(0, 16_384) until file.empty?
+      data
+    end
+
     it 'returns an incomplete piece' do
       manager = described_class.new(torrent)
 
@@ -75,9 +83,30 @@ RSpec.describe PieceManager do
 
       expect(piece.index).to eq(4)
     end
+
+    it 'retries pieces that failed integrity check' do
+      manager = torrent_pi6.piece_manager
+
+      manager.request_chunk(0, 0)
+      manager.request_chunk(0, 16_384)
+      manager.receive_chunk(0, 0, file_chunks[0])
+      manager.receive_chunk(0, 16_384, 'wrong payload')
+
+      manager.request_chunk(1, 0)
+      manager.request_chunk(1, 16_384)
+      manager.receive_chunk(1, 0, file_chunks[2])
+      manager.receive_chunk(1, 16_384, file_chunks[3])
+
+      payload = File.read('spec/files/peer_messages/pi6_bitfield.dat')
+      bitfield = BitField.new(torrent_pi6.number_of_pieces)
+      bitfield.populate(payload)
+      piece = manager.incomplete_piece(bitfield)
+
+      expect(piece.index).to eq(0)
+    end
   end
 
-  describe '#incomplete_piece' do
+  describe '#integrity_check' do
     describe 'single chunk file' do
       def file_chunks
         file = File.read('spec/files/downloads/potato.txt')
@@ -105,10 +134,25 @@ RSpec.describe PieceManager do
       end
 
       it 'passes integrity check' do
-        manager = torrent.piece_manager
+        manager = torrent_pi6.piece_manager
 
         manager.request_chunk(0, 0)
+        manager.request_chunk(0, 16_384)
         manager.receive_chunk(0, 0, file_chunks[0])
+        manager.receive_chunk(0, 16_384, file_chunks[1])
+
+        expect(manager.completed_count).to eq(1)
+      end
+
+      it 'fails integrity check and piece is reset' do
+        manager = torrent_pi6.piece_manager
+
+        manager.request_chunk(0, 0)
+        manager.request_chunk(0, 16_384)
+        manager.receive_chunk(0, 0, file_chunks[0])
+        manager.receive_chunk(0, 16_384, 'this is totally the wrong payload')
+
+        expect(manager.completed_count).to eq(0)
       end
     end
   end

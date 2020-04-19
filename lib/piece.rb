@@ -29,7 +29,7 @@ class Piece
     return true if @chunks.size.zero?
     return true if @chunks.size < @number_of_chunks
 
-    @chunks.values.none?(&:received?)
+    @chunks.values.none?(&:received?) || @chunks.values.any?(&:pending?)
   end
 
   def unrequested_chunk?
@@ -75,6 +75,8 @@ class Piece
     return false if @chunks.empty?
 
     data = @chunks.values.map(&:payload).join
+    return false if data.nil?
+    return false if piece_hash.nil?
 
     check = piece_hash.unpack1('H*') == Digest::SHA1.hexdigest(data)
     logger.warn "[PIECE_MANAGER] Integrity check failed for piece #{@piece_index}" unless check
@@ -82,10 +84,8 @@ class Piece
   end
 
   def reset_chunks
-    # FIXME: While we are reseting this piece to be redownloaded,
-    # the current piece scheduler will not ever retry it again
     logger.warn "[PIECE_MANAGER] Reseting all chunks for piece #{@piece_index}"
-    @chunk = {}
+    @chunks = {}
   end
 
   def logger
