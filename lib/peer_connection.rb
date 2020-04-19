@@ -174,10 +174,10 @@ class PeerConnection
 
     piece = piece_manager.incomplete_piece(@bitfield)
     piece_index = piece.index
-    chunk_offset = next_chunk_to_request
+    chunk_offset = piece.next_chunk_to_request
     chunk_size = Piece::CHUNK_SIZE
     message = request_message(piece_index, chunk_offset, chunk_size)
-    piece_manager.request_chunk(piece_index, chunk_offset, chunk_size)
+    piece_manager.request_chunk(piece_index, chunk_offset)
 
     logger.info "[PEER_CONNECTION][#{@peer_n}] requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
 

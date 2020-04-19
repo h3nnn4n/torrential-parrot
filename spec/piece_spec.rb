@@ -38,4 +38,35 @@ RSpec.describe Piece do
       expect(piece.missing_chunk?).to be(false)
     end
   end
+
+  describe '#request_chunk' do
+    it 'raises if an invalid chunk is requested' do
+      piece = described_class.new(16_384 * 2, 0)
+
+      expect { piece.request_chunk(16_384 * 2) }.to raise_exception(RuntimeError)
+    end
+  end
+
+  describe '#next_chunk_to_request' do
+    it 'returns 0 if it is the first request' do
+      piece = described_class.new(16_384 * 3, 0)
+
+      expect(piece.next_chunk_to_request).to be(0)
+    end
+
+    it 'returns second if it is the second request' do
+      piece = described_class.new(16_384 * 4, 0)
+      piece.request_chunk(0)
+
+      expect(piece.next_chunk_to_request).to be(16_384)
+    end
+
+    it 'returns third if it is the third request' do
+      piece = described_class.new(16_384 * 4, 0)
+      piece.request_chunk(0)
+      piece.request_chunk(16_384)
+
+      expect(piece.next_chunk_to_request).to be(16_384 * 2)
+    end
+  end
 end
