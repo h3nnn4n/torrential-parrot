@@ -11,6 +11,34 @@ RSpec.describe PieceManager do
     end
   end
 
+  describe '#number_of_pieces' do
+    it 'is 1_340 for debian' do
+      manager = described_class.new(torrent_debian)
+
+      expect(manager.number_of_pieces).to eq(torrent_debian.number_of_pieces)
+    end
+
+    it 'is 34 for pi6' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.number_of_pieces).to eq(torrent_pi6.number_of_pieces)
+    end
+  end
+
+  describe '#torrent_size' do
+    it 'is 351_272_960 for debian' do
+      manager = described_class.new(torrent_debian)
+
+      expect(manager.torrent_size).to eq(351_272_960)
+    end
+
+    it 'is 42 for pi6' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.torrent_size).to eq(1_111_103)
+    end
+  end
+
   describe '#started_piece_missing_chunks' do
     it 'returns nil if all pieces are empty' do
       manager = described_class.new(torrent)

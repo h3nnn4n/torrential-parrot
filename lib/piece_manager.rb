@@ -18,7 +18,7 @@ class PieceManager
   end
 
   def number_of_pieces
-    torrent_size / piece_size
+    (torrent_size.to_f / piece_size).ceil
   end
 
   def hash_for_piece(index)

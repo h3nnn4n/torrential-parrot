@@ -23,11 +23,11 @@ class Torrent
   end
 
   def hash_for_piece(piece_index)
-    pieces[piece_index]
+    pieces_hash[piece_index]
   end
 
-  def pieces
-    @pieces ||= begin
+  def pieces_hash
+    @pieces_hash ||= begin
       data = []
       tmp = @bdata.dig('info', 'pieces')
       data << tmp.slice!(0, 20) until tmp.empty?
@@ -44,6 +44,10 @@ class Torrent
 
   def piece_size
     @bdata['info']['piece length']
+  end
+
+  def number_of_pieces
+    pieces_hash.count
   end
 
   def info_hash
