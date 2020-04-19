@@ -12,6 +12,7 @@ group :test do
   gem 'rspec_junit_formatter'
   gem 'vcr'
   gem 'webmock'
+  gem 'simplecov', require: false
 end
 
 group :development do
