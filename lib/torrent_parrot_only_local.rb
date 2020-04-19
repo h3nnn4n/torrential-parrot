@@ -47,7 +47,7 @@ loop do
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.2
+  sleep 0.05
 end
 
 nil
