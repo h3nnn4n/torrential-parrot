@@ -14,8 +14,8 @@ jobs:
       - checkout
 
       - restore_cache:
-        keys:
-          - ruby-bundle-v2-{{ checksum "Gemfile.lock" }}
+          keys:
+            - ruby-bundle-v2-{{ checksum "Gemfile.lock" }}
 
       - run:
           name: Bundle Install
@@ -24,9 +24,9 @@ jobs:
             bundle check --path=vendor/bundle || bundle install  --jobs=4 --retry=3
 
       - save_cache:
-        key: ruby-bundle-v2-{{ checksum "Gemfile.lock" }}
-        paths:
-          - vendor/bundle
+          key: ruby-bundle-v2-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
 
       - run:
           name: Run rspec
