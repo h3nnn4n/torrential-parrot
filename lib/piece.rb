@@ -79,6 +79,8 @@ class Piece
   end
 
   def reset_chunks
+    # FIXME: While we are reseting this piece to be redownloaded,
+    # the current piece scheduler will not ever retry it again
     logger.warn "[PIECE_MANAGER] Reseting all chunks for piece #{@piece_index}"
     @chunk = {}
   end
