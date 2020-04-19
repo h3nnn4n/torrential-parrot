@@ -73,6 +73,7 @@ class PieceManager
   def print_status
     data = [
       '[TRANSFER_STATUS]',
+      "total: #{number_of_pieces} ",
       "completed: #{completed_count} ",
       "missing: #{missing_count} ",
       "progress: #{completed_count.to_f / number_of_pieces * 100.0}% "
