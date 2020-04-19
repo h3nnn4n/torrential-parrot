@@ -3,6 +3,8 @@
 require_relative 'chunk'
 
 class Piece
+  CHUNK_SIZE = 16_384
+
   attr_reader :completed
 
   def initialize(piece_size, piece_index)
@@ -28,14 +30,19 @@ class Piece
     @chunks.size.positive?
   end
 
-  def request_chunk(chunk_offset, chunk_size)
-    chunk_index = chunk_offset / chunk_size
+  def next_chunk_to_request
+    last_chunk = @chunks.keys.max
+    (last_chunk + 1) * CHUNK_SIZE
+  end
+
+  def request_chunk(chunk_offset)
+    chunk_index = chunk_offset / CHUNK_SIZE
     @chunks[chunk_index] ||= Chunk.new
     @chunks[chunk_index].request
   end
 
-  def receive_chunk(chunk_offset, chunk_size)
-    chunk_index = chunk_offset / chunk_size
+  def receive_chunk(chunk_offset)
+    chunk_index = chunk_offset / CHUNK_SIZE
     @chunks[chunk_index].receive
   end
 end

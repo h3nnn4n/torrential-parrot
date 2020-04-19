@@ -20,8 +20,8 @@ RSpec.describe Piece do
       piece = described_class.new(16_384 * 4, 0)
 
       (0..2).each do |i|
-        piece.request_chunk(16_384 * i, 16_384)
-        piece.receive_chunk(16_384 * i, 16_384)
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i)
       end
 
       expect(piece.missing_chunk?).to be(true)
@@ -31,8 +31,8 @@ RSpec.describe Piece do
       piece = described_class.new(16_384 * 4, 0)
 
       (0..3).each do |i|
-        piece.request_chunk(16_384 * i, 16_384)
-        piece.receive_chunk(16_384 * i, 16_384)
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i)
       end
 
       expect(piece.missing_chunk?).to be(false)

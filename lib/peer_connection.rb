@@ -172,9 +172,10 @@ class PeerConnection
     delta = now - @requested_timer
     return false unless delta >= 2
 
-    piece_index = @bitfield.random_set_bit_index
-    chunk_offset = 0
-    chunk_size = 16_384
+    piece = piece_manager.incomplete_piece(@bitfield)
+    piece_index = piece.index
+    chunk_offset = next_chunk_to_request
+    chunk_size = Piece::CHUNK_SIZE
     message = request_message(piece_index, chunk_offset, chunk_size)
     piece_manager.request_chunk(piece_index, chunk_offset, chunk_size)
 

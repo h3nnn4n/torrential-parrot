@@ -20,7 +20,7 @@ RSpec.describe PieceManager do
 
     it 'returns a piece' do
       manager = described_class.new(torrent)
-      manager.request_chunk(0, 0, 16_384)
+      manager.request_chunk(0, 0)
 
       expect(manager.started_piece_missing_chunks).to be_a(Piece)
     end

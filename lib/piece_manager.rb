@@ -24,15 +24,17 @@ class PieceManager
     bitfield.all_bits_set_index.each do |piece_index|
       @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
       @pieces[piece_index].tap do |piece|
-        return piece if piece.missing_chunk?
+        next piece unless piece.missing_chunk?
+
+        return piece
       end
     end
   end
 
-  def request_chunk(piece_index, chunk_offset, chunk_size)
+  def request_chunk(piece_index, chunk_offset)
     @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
     @pieces[piece_index].tap do |piece|
-      piece.request_chunk(chunk_offset, chunk_size)
+      piece.request_chunk(chunk_offset)
     end
   end
 end
