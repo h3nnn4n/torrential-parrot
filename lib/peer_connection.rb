@@ -265,7 +265,7 @@ class PeerConnection
   end
 
   def send_msg(payload)
-    socket.puts(payload)
+    socket.write(payload)
     @message_sent_count += 1
   end
 
