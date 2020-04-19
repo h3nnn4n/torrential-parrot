@@ -3,6 +3,10 @@
 require 'piece'
 
 RSpec.describe Piece do
+  def fake_payload
+    [0, 1, 2, 3].pack('C*')
+  end
+
   describe '#initialize' do
     it 'initializes without exploding' do
       described_class.new(16_384, 0)
@@ -21,7 +25,7 @@ RSpec.describe Piece do
 
       (0..2).each do |i|
         piece.request_chunk(16_384 * i)
-        piece.receive_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
       end
 
       expect(piece.unrequested_chunk?).to be(true)
@@ -50,7 +54,7 @@ RSpec.describe Piece do
 
       (0..2).each do |i|
         piece.request_chunk(16_384 * i)
-        piece.receive_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
       end
 
       expect(piece.missing_chunk?).to be(true)
@@ -61,7 +65,7 @@ RSpec.describe Piece do
 
       (0..3).each do |i|
         piece.request_chunk(16_384 * i)
-        piece.receive_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
       end
 
       expect(piece.missing_chunk?).to be(false)
@@ -111,7 +115,7 @@ RSpec.describe Piece do
 
       (0..2).each do |i|
         piece.request_chunk(16_384 * i)
-        piece.receive_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
       end
 
       expect(piece.completed?).to be(false)
@@ -122,7 +126,7 @@ RSpec.describe Piece do
 
       (0..3).each do |i|
         piece.request_chunk(16_384 * i)
-        piece.receive_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i, fake_payload)
       end
 
       expect(piece.completed?).to be(true)

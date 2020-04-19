@@ -48,9 +48,9 @@ class PieceManager
     end
   end
 
-  def receive_chunk(piece_index, chunk_offset)
+  def receive_chunk(piece_index, chunk_offset, payload)
     @pieces[piece_index].tap do |piece|
-      piece.receive_chunk(chunk_offset)
+      piece.receive_chunk(chunk_offset, payload)
     end
   end
 

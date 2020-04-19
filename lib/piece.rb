@@ -59,9 +59,9 @@ class Piece
     raise 'Requested too many chunks for this piece!' if chunk_index >= @number_of_chunks
   end
 
-  def receive_chunk(chunk_offset)
+  def receive_chunk(chunk_offset, payload)
     chunk_index = chunk_offset / CHUNK_SIZE
-    @chunks[chunk_index].receive
+    @chunks[chunk_index].receive(payload)
 
     raise 'This chunk cant possibly exist!' if chunk_index >= @number_of_chunks
   end

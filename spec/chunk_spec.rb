@@ -41,7 +41,7 @@ RSpec.describe Chunk do
     it 'register request' do
       chunk = described_class.new
       chunk.request
-      chunk.receive
+      chunk.receive([1, 2, 3].pack('CCC'))
 
       expect(chunk.received?).to be(true)
     end
@@ -49,7 +49,7 @@ RSpec.describe Chunk do
     it 'marks as not pending' do
       chunk = described_class.new
       chunk.request
-      chunk.receive
+      chunk.receive([1, 2, 3].pack('CCC'))
 
       expect(chunk.pending?).to be(false)
     end

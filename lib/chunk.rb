@@ -5,6 +5,7 @@ class Chunk
     @requested = false
     @received = false
     @pending = false
+    @payload = nil
   end
 
   def request
@@ -12,9 +13,10 @@ class Chunk
     @pending = true
   end
 
-  def receive
+  def receive(payload)
     @received = true
     @pending = false
+    @payload = payload
   end
 
   def pending?

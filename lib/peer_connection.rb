@@ -274,7 +274,7 @@ class PeerConnection
 
     _, _, piece_index, chunk_offset = payload.unpack('NCNN')
 
-    piece_manager.receive_chunk(piece_index, chunk_offset)
+    piece_manager.receive_chunk(piece_index, chunk_offset, payload)
     @pending_requests -= 1
 
     # process_message(payload[4..-1]) if payload.size > 4
