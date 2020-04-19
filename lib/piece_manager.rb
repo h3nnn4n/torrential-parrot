@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'piece'
+require_relative 'ninja_logger'
 
 class PieceManager
   def initialize(torrent)
@@ -10,6 +11,14 @@ class PieceManager
 
   def piece_size
     @torrent.piece_size
+  end
+
+  def torrent_size
+    @torrent.size
+  end
+
+  def number_of_pieces
+    torrent_size / piece_size
   end
 
   def started_piece_missing_chunks
@@ -37,5 +46,29 @@ class PieceManager
     @pieces[piece_index].tap do |piece|
       piece.request_chunk(chunk_offset)
     end
+  end
+
+  def receive_chunk(piece_index, chunk_offset)
+    @pieces[piece_index].tap do |piece|
+      piece.receive_chunk(chunk_offset)
+    end
+  end
+
+  def completed_count
+    @pieces.values.select(&:completed?).count
+  end
+
+  def print_status
+    data = [
+      '[TRANSFER_STATUS]',
+      "completed: #{completed_count} "
+    ]
+
+    msg = data.join(' ')
+    logger.info msg
+  end
+
+  def logger
+    NinjaLogger.logger
   end
 end

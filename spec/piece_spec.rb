@@ -98,4 +98,34 @@ RSpec.describe Piece do
       expect(piece.next_chunk_to_request).to be(16_384 * 2)
     end
   end
+
+  describe '#completed?' do
+    it 'is not completed on creation' do
+      piece = described_class.new(16_384 * 2, 0)
+
+      expect(piece.completed?).to be(false)
+    end
+
+    it 'returns false if there is a chunk missing' do
+      piece = described_class.new(16_384 * 4, 0)
+
+      (0..2).each do |i|
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i)
+      end
+
+      expect(piece.completed?).to be(false)
+    end
+
+    it 'returns true if all chunks are present' do
+      piece = described_class.new(16_384 * 4, 0)
+
+      (0..3).each do |i|
+        piece.request_chunk(16_384 * i)
+        piece.receive_chunk(16_384 * i)
+      end
+
+      expect(piece.completed?).to be(true)
+    end
+  end
 end

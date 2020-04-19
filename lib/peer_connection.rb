@@ -272,6 +272,9 @@ class PeerConnection
     dump(payload, info: 'receive_piece')
     logger.info "[PEER_CONNECTION][#{@peer_n}] got a piece!"
 
+    _, _, piece_index, chunk_offset = payload.unpack('NCNN')
+
+    piece_manager.receive_chunk(piece_index, chunk_offset)
     @pending_requests -= 1
 
     # process_message(payload[4..-1]) if payload.size > 4

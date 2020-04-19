@@ -42,6 +42,7 @@ peer_manager.add_peer(Peer.new('127.0.0.1', 51_413, torrent, peer_id, peer_n: 1)
 
 loop do
   peer_manager.print_status
+  torrent.piece_manager.print_status
   # break if peers.size.zero?
 
   peer_manager.read_and_dispatch_messages

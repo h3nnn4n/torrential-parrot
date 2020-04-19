@@ -34,6 +34,7 @@ peers.each { |peer| peer_manager.add_peer(peer) }
 
 loop do
   peer_manager.print_status
+  piece_manager.print_status
   break if peers.size.zero?
 
   peer_manager.read_and_dispatch_messages
