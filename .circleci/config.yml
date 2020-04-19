@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   ruby: circleci/ruby@0.1.2
+  coverage-reporter: codacy/coverage-reporter@7.8.1
 
 jobs:
   rspec:
@@ -13,7 +14,9 @@ jobs:
 
       - run:
           name: Bundle Install
-          command: gem install bundler:2.1.2 && bundle check --path=vendor/bundle || bundle install  --jobs=4 --retry=3
+          command: |
+            gem install bundler:2.1.2
+            bundle check --path=vendor/bundle || bundle install  --jobs=4 --retry=3
 
       - run:
           name: Run rspec
@@ -26,6 +29,7 @@ jobs:
 
       - store_test_results:
           path: test_results
+      - coverage-reporter/send_report
 
   rubocop:
     docker:
@@ -46,11 +50,6 @@ workflows:
 
   build:
     jobs:
-      - rubocop:
-        filter:
-          ignore:
-            - potato
-      - rspec:
-        filter:
-          ignore:
-            - potato
+      - rubocop
+      - rspec
+      - send-coverage-report
