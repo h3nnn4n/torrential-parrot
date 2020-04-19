@@ -14,6 +14,12 @@ class BitField
     @bits[index]
   end
 
+  def everything_set?
+    return false if @bits.size.zero?
+
+    @bits.values.all?
+  end
+
   def set(index)
     @bits[index] = true
   end
@@ -22,10 +28,14 @@ class BitField
     @bits[index] = false
   end
 
-  def random_set_bit_index
+  def all_bits_set_index
     bits_set = @bits.map { |index, bit| index if bit }
     bits_set.compact!
-    bits_set.sample
+    bits_set
+  end
+
+  def random_set_bit_index
+    all_bits_set_index.sample
   end
 
   def random_unset_bit_index

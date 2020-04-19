@@ -25,6 +25,29 @@ RSpec.describe BitField do
     end
   end
 
+  describe '#all_bits_set_index' do
+    it 'has no set bits' do
+      fake_payload = [2, 5, 0].pack('NCC')
+      bitfield = described_class.new(8)
+      bitfield.populate(fake_payload)
+      expect(bitfield.all_bits_set_index.size).to be(0)
+    end
+
+    it 'has some set bits' do
+      fake_payload = [2, 5, 7].pack('NCC')
+      bitfield = described_class.new(8)
+      bitfield.populate(fake_payload)
+      expect(bitfield.all_bits_set_index).to eq([0, 1, 2])
+    end
+
+    it 'has all possible bits' do
+      fake_payload = [2, 5, 255].pack('NCC')
+      bitfield = described_class.new(8)
+      bitfield.populate(fake_payload)
+      expect(bitfield.all_bits_set_index).to eq([0, 1, 2, 3, 4, 5, 6, 7])
+    end
+  end
+
   describe '#any_bit_set?' do
     it 'has at least one set bit' do
       bitfield = build_bitfield
@@ -86,6 +109,22 @@ RSpec.describe BitField do
     it 'has the correct number of bits set' do
       bitfield = build_bitfield
       expect(bitfield.bit_set_count).to eq(14)
+    end
+  end
+
+  describe '#everything_set?' do
+    it 'has no set bits' do
+      fake_payload = [2, 5, 0].pack('NCC')
+      bitfield = described_class.new(8)
+      bitfield.populate(fake_payload)
+      expect(bitfield.everything_set?).to be(false)
+    end
+
+    it 'has all bits set' do
+      fake_payload = [2, 5, 255].pack('NCC')
+      bitfield = described_class.new(8)
+      bitfield.populate(fake_payload)
+      expect(bitfield.everything_set?).to be(true)
     end
   end
 end

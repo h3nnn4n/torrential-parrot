@@ -20,8 +20,17 @@ class PieceManager
     missing_chunks.first
   end
 
+  def incomplete_piece(bitfield)
+    bitfield.all_bits_set_index.each do |piece_index|
+      @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
+      @pieces[piece_index].tap do |piece|
+        return piece if piece.missing_chunk?
+      end
+    end
+  end
+
   def request_chunk(piece_index, chunk_offset, chunk_size)
-    @pieces[piece_index] ||= Piece.new(piece_size)
+    @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
     @pieces[piece_index].tap do |piece|
       piece.request_chunk(chunk_offset, chunk_size)
     end

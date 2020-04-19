@@ -5,11 +5,16 @@ require_relative 'chunk'
 class Piece
   attr_reader :completed
 
-  def initialize(piece_size)
+  def initialize(piece_size, piece_index)
     @piece_size = piece_size
+    @piece_index = piece_index
     @completed = false
     @chunks = {}
     @number_of_chunks = piece_size / 16_384
+  end
+
+  def index
+    @piece_index
   end
 
   def missing_chunk?
