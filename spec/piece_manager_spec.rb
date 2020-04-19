@@ -48,4 +48,40 @@ RSpec.describe PieceManager do
       expect(piece.index).to eq(4)
     end
   end
+
+  describe '#incomplete_piece' do
+    describe 'single chunk file' do
+      def file_chunks
+        file = File.read('spec/files/downloads/potato.txt')
+
+        data = []
+        data << file.slice!(0, 16_384) until file.empty?
+        data
+      end
+
+      it 'passes integrity check' do
+        manager = torrent.piece_manager
+
+        manager.request_chunk(0, 0)
+        manager.receive_chunk(0, 0, file_chunks[0])
+      end
+    end
+
+    describe 'multiple chunks and pieces file' do
+      def file_chunks
+        file = File.read('spec/files/downloads/pi6.txt')
+
+        data = []
+        data << file.slice!(0, 16_384) until file.empty?
+        data
+      end
+
+      it 'passes integrity check' do
+        manager = torrent.piece_manager
+
+        manager.request_chunk(0, 0)
+        manager.receive_chunk(0, 0, file_chunks[0])
+      end
+    end
+  end
 end

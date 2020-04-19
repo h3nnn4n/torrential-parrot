@@ -60,4 +60,16 @@ RSpec.describe Torrent do
       expect(torrent2.size).to eq(44)
     end
   end
+
+  describe '#hash_for_piece' do
+    it 'returns the hash of a correct size' do
+      expect(torrent.hash_for_piece(0).size).to be(20)
+    end
+
+    it 'returns the hash for a given index' do
+      hash = "\xC1\xD5\xCD\xD7m\xB4\v\xB4\xD1|\xF5O\xFC\xEBY\xD5\fdd\n"
+
+      expect(torrent.hash_for_piece(0).unpack('h*')).to eq(hash.unpack('h*'))
+    end
+  end
 end

@@ -21,6 +21,10 @@ class PieceManager
     torrent_size / piece_size
   end
 
+  def hash_for_piece(index)
+    @torrent.hash_for_piece(index)
+  end
+
   def started_piece_missing_chunks
     missing_chunks = @pieces.values.select do |piece|
       piece.at_least_one_request? && piece.missing_chunk?
@@ -51,6 +55,10 @@ class PieceManager
   def receive_chunk(piece_index, chunk_offset, payload)
     @pieces[piece_index].tap do |piece|
       piece.receive_chunk(chunk_offset, payload)
+      break unless piece.completed?
+
+      piece.piece_hash = hash_for_piece(piece_index)
+      piece.reset_chunks unless piece.integrity_check
     end
   end
 

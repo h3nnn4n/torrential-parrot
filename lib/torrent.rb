@@ -22,6 +22,19 @@ class Torrent
       @bdata['announce-list']&.flatten || [main_tracker]
   end
 
+  def hash_for_piece(piece_index)
+    pieces[piece_index]
+  end
+
+  def pieces
+    @pieces ||= begin
+      data = []
+      tmp = @bdata.dig('info', 'pieces')
+      data << tmp.slice!(0, 20) until tmp.empty?
+      data
+    end
+  end
+
   def size
     @size ||= begin
                 @bdata['info']['length'] ||

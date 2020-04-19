@@ -132,4 +132,55 @@ RSpec.describe Piece do
       expect(piece.completed?).to be(true)
     end
   end
+
+  describe '#integrity_check' do
+    describe 'single chunk file' do
+      def file_chunks
+        file = File.read('spec/files/downloads/potato.txt')
+
+        data = []
+        data << file.slice!(0, 16_384) until file.empty?
+        data
+      end
+
+      it 'passes integrity check' do
+        piece = described_class.new(16_384 * 4, 0)
+        piece.piece_hash = torrent.hash_for_piece(0)
+        piece.request_chunk(0)
+        piece.receive_chunk(0, file_chunks.first)
+
+        expect(piece.integrity_check).to be(true)
+      end
+
+      it 'fails integrity check' do
+        piece = described_class.new(16_384 * 4, 0)
+        piece.piece_hash = torrent.hash_for_piece(0)
+        piece.request_chunk(0)
+        piece.receive_chunk(0, 'totally the wrong piece')
+
+        expect(piece.integrity_check).to be(false)
+      end
+    end
+
+    describe 'multiple chunks and pieces file' do
+      def file_chunks
+        file = File.read('spec/files/downloads/pi6.txt')
+
+        data = []
+        data << file.slice!(0, 16_384) until file.empty?
+        data
+      end
+
+      it 'passes integrity check' do
+        piece = described_class.new(16_384 * 4, 0)
+        piece.piece_hash = torrent_pi6.hash_for_piece(0)
+        piece.request_chunk(0)
+        piece.receive_chunk(0, file_chunks[0])
+        piece.request_chunk(16_384)
+        piece.receive_chunk(16_384, file_chunks[1])
+
+        expect(piece.integrity_check).to be(true)
+      end
+    end
+  end
 end

@@ -1,15 +1,19 @@
 # frozen_string_literal: true
 
 require_relative 'chunk'
+require_relative 'ninja_logger'
 
 class Piece
+  attr_accessor :piece_hash
+
   CHUNK_SIZE = 16_384
 
-  def initialize(piece_size, piece_index)
+  def initialize(piece_size, piece_index, piece_hash: nil)
     @piece_size = piece_size
     @piece_index = piece_index
     @chunks = {}
     @number_of_chunks = piece_size / 16_384
+    @piece_hash = piece_hash
   end
 
   def index
@@ -64,5 +68,22 @@ class Piece
     @chunks[chunk_index].receive(payload)
 
     raise 'This chunk cant possibly exist!' if chunk_index >= @number_of_chunks
+  end
+
+  def integrity_check
+    data = @chunks.values.map(&:payload).join
+
+    check = piece_hash.unpack1('H*') == Digest::SHA1.hexdigest(data)
+    logger.warn "[PIECE_MANAGER] Integrity check failed for piece #{@piece_index}" unless check
+    check
+  end
+
+  def reset_chunks
+    logger.warn "[PIECE_MANAGER] Reseting all chunks for piece #{@piece_index}"
+    @chunk = {}
+  end
+
+  def logger
+    NinjaLogger.logger
   end
 end

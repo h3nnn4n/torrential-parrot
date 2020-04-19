@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Chunk
+  attr_reader :payload
+
   def initialize
     @requested = false
     @received = false
