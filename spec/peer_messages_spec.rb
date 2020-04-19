@@ -35,8 +35,26 @@ describe PeerMessages do
       message = messager.handshake_message
       unpacker = 'Ca19C8H40a20'
 
-      # expect(message).to eq(handshake_message)
       expect(message.unpack(unpacker)).to eq(handshake_message.unpack(unpacker))
+    end
+  end
+
+  describe '#interested_message' do
+    def interested_message
+      File.read('spec/files/peer_messages/interested.dat', encoding: 'iso-8859-1')
+    end
+
+    it 'has the expected length' do
+      message = messager.interested_message
+
+      expect(message.size).to be(5)
+    end
+
+    it 'unpacks correctly' do
+      message = messager.interested_message
+      unpacker = 'NC'
+
+      expect(message.unpack(unpacker)).to eq(interested_message.unpack(unpacker))
     end
   end
 
