@@ -29,6 +29,10 @@ jobs:
 
       - store_test_results:
           path: test_results
+
+      - store_artifacts:
+          path: coverage
+
       - coverage-reporter/send_report
 
   rubocop:
