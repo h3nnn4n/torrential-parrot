@@ -11,6 +11,11 @@ require_relative 'peer_messages'
 class PeerConnection
   include PeerMessages
 
+  # FIXME
+  # For now requesting more than one chunk at a time can cause a piece to be
+  # processed midway through, which causes all kinds of mayhem
+  MAX_REQUESTS = 1
+
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
               :state, :chocked
 
@@ -32,6 +37,7 @@ class PeerConnection
     @message_recv_count = 0
     @message_sent_count = 0
     @requested_count = 0
+    @pending_requests = 0
     @requested_timer = Time.now.to_i
     @bitfield = BitField.new(torrent.size)
 
@@ -132,7 +138,7 @@ class PeerConnection
   def send_messages
     return send_interested if !@interested && part_count.positive?
     return if keepalive
-    return request_piece if !@chocked && @interested
+    return request_pieces if !@chocked && @interested
   rescue Errno::ECONNRESET, Errno::ENETUNREACH, Errno::ETIMEDOUT,
          Errno::EPIPE
     @state = :dead
@@ -167,10 +173,12 @@ class PeerConnection
     end
   end
 
+  def request_pieces
+    request_piece while @pending_requests < MAX_REQUESTS
+  end
+
   def request_piece
     now = Time.now.to_i
-    delta = now - @requested_timer
-    return false unless delta >= 2
 
     piece = piece_manager.incomplete_piece(@bitfield)
     piece_index = piece.index
@@ -185,6 +193,7 @@ class PeerConnection
     dump(message, info: 'send_request_piece')
 
     @requested_count += 1
+    @pending_requests += 1
     @requested_timer = now
 
     true
@@ -262,6 +271,8 @@ class PeerConnection
   def process_piece(payload)
     dump(payload, info: 'receive_piece')
     logger.info "[PEER_CONNECTION][#{@peer_n}] got a piece!"
+
+    @pending_requests -= 1
 
     # process_message(payload[4..-1]) if payload.size > 4
   end
