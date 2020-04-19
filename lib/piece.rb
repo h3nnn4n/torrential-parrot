@@ -72,6 +72,8 @@ class Piece
   end
 
   def integrity_check
+    return false if @chunks.empty?
+
     data = @chunks.values.map(&:payload).join
 
     check = piece_hash.unpack1('H*') == Digest::SHA1.hexdigest(data)

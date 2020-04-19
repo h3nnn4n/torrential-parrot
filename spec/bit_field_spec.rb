@@ -26,6 +26,10 @@ RSpec.describe BitField do
   end
 
   describe '#all_bits_set_index' do
+    def payload
+      File.read('spec/files/peer_messages/pi6_bitfield.dat')
+    end
+
     it 'has no set bits' do
       fake_payload = [2, 5, 0].pack('NCC')
       bitfield = described_class.new(8)
@@ -45,6 +49,13 @@ RSpec.describe BitField do
       bitfield = described_class.new(8)
       bitfield.populate(fake_payload)
       expect(bitfield.all_bits_set_index).to eq([0, 1, 2, 3, 4, 5, 6, 7])
+    end
+
+    it 'populates with a real payload' do
+      bit_field = described_class.new(torrent_pi6.number_of_pieces)
+      bit_field.populate(payload)
+
+      expect(bit_field.all_bits_set_index).to eq((0..33).to_a)
     end
   end
 
@@ -125,6 +136,66 @@ RSpec.describe BitField do
       bitfield = described_class.new(8)
       bitfield.populate(fake_payload)
       expect(bitfield.everything_set?).to be(true)
+    end
+  end
+
+  describe '#populate' do
+    def payload
+      File.read('spec/files/peer_messages/pi6_bitfield.dat')
+    end
+
+    it 'populates with a real payload' do
+      bit_field = described_class.new(torrent_pi6.number_of_pieces)
+      bit_field.populate(payload)
+
+      expect(bit_field.everything_set?).to be(true)
+    end
+  end
+
+  describe '#byte_to_bits' do
+    it 'works for 0' do
+      bitfield = described_class.new(8)
+
+      expect(bitfield.send(:byte_to_bits, 0)).to eq(
+        [false, false, false, false, false, false, false, false]
+      )
+    end
+
+    it 'works for 1' do
+      bitfield = described_class.new(8)
+
+      expect(bitfield.send(:byte_to_bits, 1)).to eq(
+        [true, false, false, false, false, false, false, false]
+      )
+    end
+
+    it 'works for 2' do
+      bitfield = described_class.new(8)
+
+      expect(bitfield.send(:byte_to_bits, 2)).to eq(
+        [false, true, false, false, false, false, false, false]
+      )
+    end
+
+    it 'works for 3' do
+      bitfield = described_class.new(8)
+      answer = [true, true, false, false, false, false, false, false]
+
+      expect(bitfield.send(:byte_to_bits, 3)).to eq(answer)
+    end
+
+    it 'works for 16' do
+      bitfield = described_class.new(8)
+      answer = [false, false, false, false, true, false, false, false]
+
+      expect(bitfield.send(:byte_to_bits, 16)).to eq(answer)
+    end
+
+    it 'works for 17' do
+      bitfield = described_class.new(8)
+      answer = [true, false, false, false, true, false, false, false]
+
+      expect(bitfield.send(:byte_to_bits, 17)).to eq(answer)
     end
   end
 end
