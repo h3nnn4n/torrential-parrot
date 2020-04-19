@@ -58,8 +58,22 @@ class PieceManager
       break unless piece.completed?
 
       piece.piece_hash = hash_for_piece(piece_index)
-      piece.reset_chunks unless piece.integrity_check
+      break if piece.integrity_check
+
+      piece.reset_chunks
     end
+  end
+
+  def pending_chunks_count
+    count = 0
+
+    @pieces.each_value do |piece|
+      piece.chunks.each_value do |chunk|
+        count += 1 if chunk.pending?
+      end
+    end
+
+    count
   end
 
   def completed_count
@@ -73,10 +87,11 @@ class PieceManager
   def print_status
     data = [
       '[TRANSFER_STATUS]',
-      "total: #{number_of_pieces} ",
-      "completed: #{completed_count} ",
-      "missing: #{missing_count} ",
-      "progress: #{completed_count.to_f / number_of_pieces * 100.0}% "
+      "t: #{number_of_pieces} ",
+      "c: #{completed_count} ",
+      "m: #{missing_count} ",
+      "p: #{pending_chunks_count} ",
+      "%: #{(completed_count.to_f / number_of_pieces * 100.0).round(2)}% "
     ]
 
     msg = data.join(' ')

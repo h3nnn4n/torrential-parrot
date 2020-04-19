@@ -5,6 +5,7 @@ require_relative 'ninja_logger'
 
 class Piece
   attr_accessor :piece_hash
+  attr_reader :chunks
 
   CHUNK_SIZE = 16_384
 
