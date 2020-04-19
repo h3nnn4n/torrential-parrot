@@ -59,8 +59,7 @@ class PieceManager
   end
 
   def missing_count
-    # FIXME this is weird and smells
-    number_of_pieces - @pieces.values.reject(&:completed?).count
+    number_of_pieces - @pieces.values.select(&:completed?).count
   end
 
   def print_status
@@ -68,7 +67,7 @@ class PieceManager
       '[TRANSFER_STATUS]',
       "completed: #{completed_count} ",
       "missing: #{missing_count} ",
-      "progress: #{completed_count.to_f / number_of_pieces.to_f * 100.0}% "
+      "progress: #{completed_count.to_f / number_of_pieces * 100.0}% "
     ]
 
     msg = data.join(' ')
