@@ -174,8 +174,9 @@ class PeerConnection
 
     piece_index = @bitfield.random_set_bit_index
     chunk_offset = 0
-    chunk_size = 2**14
+    chunk_size = 16_384
     message = request_message(piece_index, chunk_offset, chunk_size)
+    piece_manager.request_chunk(piece_index, chunk_offset, chunk_size)
 
     logger.info "[PEER_CONNECTION][#{@peer_n}] requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
 
@@ -267,6 +268,10 @@ class PeerConnection
   def send_msg(payload)
     socket.write(payload)
     @message_sent_count += 1
+  end
+
+  def piece_manager
+    @torrent.piece_manager
   end
 
   def part_count

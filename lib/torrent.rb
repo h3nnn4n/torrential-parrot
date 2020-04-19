@@ -2,10 +2,15 @@
 
 require 'digest'
 
+require_relative 'piece_manager'
+
 class Torrent
+  attr_reader :piece_manager
+
   def initialize(bdata, raw_data)
     @bdata = bdata
     @raw_data = raw_data
+    @piece_manager = PieceManager.new(self)
   end
 
   def main_tracker
@@ -22,6 +27,10 @@ class Torrent
                 @bdata['info']['length'] ||
                   @bdata['info']['files'].map { |file| file['length'] }.sum
               end
+  end
+
+  def piece_size
+    @bdata['info']['piece length']
   end
 
   def info_hash
