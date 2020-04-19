@@ -60,7 +60,7 @@ class PeerConnection
                  "chocked: #{@chocked}  part_count: #{part_count}"
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
 
-    send(keepalive_message)
+    send_msg(keepalive_message)
     dump(keepalive_message, info: 'send_keepalive')
     @keepalive_timer = now
     @keepalive_count += 1
@@ -97,7 +97,7 @@ class PeerConnection
 
   def send_interested
     logger.info "[PEER_CONNECTION][#{@peer_n}] sending INTERESTED"
-    send(interested_message)
+    send_msg(interested_message)
     dump(interested_message, info: 'send_interested')
     @interested = true
   end
@@ -113,9 +113,9 @@ class PeerConnection
         return false
       end
 
-      send(handshake_message)
+      send_msg(handshake_message)
       dump(handshake_message, info: 'send_handshake')
-      # send(keepalive_message)
+      # send_msg(keepalive_message)
 
       logger.info "[PEER_CONNECTION][#{@peer_n}] sent hanshake"
       @state = :handshake_sent
@@ -179,7 +179,7 @@ class PeerConnection
 
     logger.info "[PEER_CONNECTION][#{@peer_n}] requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
 
-    send(message)
+    send_msg(message)
     dump(message, info: 'send_request_piece')
 
     @requested_count += 1
@@ -264,7 +264,7 @@ class PeerConnection
     # process_message(payload[4..-1]) if payload.size > 4
   end
 
-  def send(payload)
+  def send_msg(payload)
     socket.puts(payload)
     @message_sent_count += 1
   end
