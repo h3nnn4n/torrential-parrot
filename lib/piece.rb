@@ -26,6 +26,13 @@ class Piece
     @chunks.values.none?(&:received?)
   end
 
+  def unrequested_chunk?
+    return true if @chunks.size.zero?
+    return true if @chunks.size < @number_of_chunks
+
+    @chunks.values.none?(&:requested?)
+  end
+
   def at_least_one_request?
     @chunks.size.positive?
   end
