@@ -3,14 +3,15 @@
 require 'bencode'
 require 'pry'
 
+require_relative 'file_manager'
 require_relative 'ninja_logger'
 require_relative 'peer'
 require_relative 'peer_factory'
 require_relative 'peer_manager'
 require_relative 'torrent'
+require_relative 'torrent_manager'
 require_relative 'tracker'
 require_relative 'tracker_factory'
-require_relative 'torrent_manager'
 
 NinjaLogger.set_logger_to_stdout
 
@@ -49,7 +50,13 @@ loop do
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.05
+  sleep 0.025
 end
+
+NinjaLogger.logger.info 'Download finished'
+
+raw_chunks = torrent.piece_manager.all_chunks
+file_manager = FileManager.new(torrent, raw_chunks)
+file_manager.build_files!
 
 nil

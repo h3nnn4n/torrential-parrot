@@ -14,7 +14,7 @@ class PeerConnection
   # FIXME
   # For now requesting more than one chunk at a time can cause a piece to be
   # processed midway through, which causes all kinds of mayhem
-  MAX_REQUESTS = 10
+  MAX_REQUESTS = 20
 
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
               :state, :chocked

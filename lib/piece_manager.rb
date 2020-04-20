@@ -85,8 +85,8 @@ class PieceManager
 
   def all_chunks
     chunks =
-      (0..number_of_pieces).map do |piece_index|
-        (0..number_of_chunks).map do |chunk_index|
+      (0..(number_of_pieces - 1)).map do |piece_index|
+        (0..(number_of_chunks - 1)).map do |chunk_index|
           @pieces[piece_index].chunks[chunk_index].payload
         end
       end
