@@ -69,14 +69,11 @@ class PeerManager
 
     return unless data.size.positive?
 
-    logger.info "got message of size #{data.size}"
     delegate_message(socket, data) if data.size.positive?
   end
 
   def delegate_message(socket, payload)
     peer = find_peer_from_socket(socket)
-
-    logger.info "recieved #{payload.size} bytes for #{peer.peer_n}"
 
     peer.process_message(payload)
   end
