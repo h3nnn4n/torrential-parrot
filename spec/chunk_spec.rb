@@ -9,6 +9,28 @@ RSpec.describe Chunk do
     end
   end
 
+  describe '#timeout_out?' do
+    it 'doesnt time out if it is fast enough' do
+      chunk = described_class.new
+      chunk.request
+
+      expect(chunk.timeout_out?).to be(false)
+    end
+
+    it 'times out if it takes too long' do
+      now = Time.now
+      chunk = described_class.new
+
+      Timecop.freeze(now) do
+        chunk.request
+      end
+
+      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+        expect(chunk.timeout_out?).to be(true)
+      end
+    end
+  end
+
   describe '#request' do
     it 'initializes as false' do
       chunk = described_class.new

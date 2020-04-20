@@ -44,16 +44,16 @@ class Piece
   end
 
   def next_chunk_to_request
-    # FIXME: This logic doenst account for gaps
-    # It assumes all chunks are requested in a row
-    return 0 if @chunks.empty?
+    missing_chunks = []
+    (0..(@number_of_chunks - 1)).each do |chunk_index|
+      @chunks[chunk_index].tap do |chunk|
+        missing_chunks << chunk_index if chunk.nil? || chunk.timeout_out?
+      end
+    end
 
-    last_chunk = @chunks.keys.max
-    next_chunk = (last_chunk + 1) * CHUNK_SIZE
+    raise 'Requesting too many chunks for this piece!' if missing_chunks.empty?
 
-    raise 'Requesting too many chunks for this piece!' if (last_chunk + 1) >= @number_of_chunks
-
-    next_chunk
+    missing_chunks.first * CHUNK_SIZE
   end
 
   def request_chunk(chunk_offset)

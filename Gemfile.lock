@@ -98,6 +98,7 @@ GEM
       simplecov-html (~> 0.11)
     simplecov-html (0.12.2)
     thor (1.0.1)
+    timecop (0.9.1)
     unicode-display_width (1.6.1)
     url (0.3.2)
     vcr (5.1.0)
@@ -125,6 +126,7 @@ DEPENDENCIES
   rubocop
   rubocop-rspec (~> 1.38, >= 1.38.1)
   simplecov
+  timecop
   vcr
   webmock
 

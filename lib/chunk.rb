@@ -3,7 +3,10 @@
 class Chunk
   attr_reader :payload
 
+  MAX_WAIT_TIME = 3 # seconds
+
   def initialize
+    @requested_at = nil
     @requested = false
     @received = false
     @pending = false
@@ -11,6 +14,7 @@ class Chunk
   end
 
   def request
+    @requested_at = Time.now
     @requested = true
     @pending = true
   end
@@ -22,11 +26,15 @@ class Chunk
   end
 
   def pending?
-    @pending
+    @pending && !timeout_out?
   end
 
   def requested?
     @requested
+  end
+
+  def timeout_out?
+    requested? && Time.now - @requested_at > MAX_WAIT_TIME
   end
 
   def received?
