@@ -45,6 +45,7 @@ loop do
   peer_manager.print_status
   torrent.piece_manager.print_status
   # break if peers.size.zero?
+  break if torrent.piece_manager.download_finished?
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages

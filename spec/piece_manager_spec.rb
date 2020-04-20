@@ -154,6 +154,24 @@ RSpec.describe PieceManager do
     end
   end
 
+  describe '#download_finished?' do
+    it 'returns false if nothing was downloaded' do
+      manager = torrent.piece_manager
+
+      expect(manager.download_finished?).to be(false)
+    end
+
+    it 'returns true if download finished' do
+      manager = torrent.piece_manager
+
+      piece_payload = File.read('spec/files/downloads/potato.txt')
+      manager.request_chunk(0, 0)
+      manager.receive_chunk(0, 0, piece_payload)
+
+      expect(manager.download_finished?).to be(true)
+    end
+  end
+
   describe '#integrity_check' do
     describe 'single chunk file' do
       def file_chunks

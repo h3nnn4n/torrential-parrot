@@ -33,6 +33,10 @@ class PieceManager
     missing_chunks.first
   end
 
+  def download_finished?
+    completed_count == number_of_pieces
+  end
+
   def incomplete_piece(bitfield)
     bitfield.all_bits_set_index.each do |piece_index|
       @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
