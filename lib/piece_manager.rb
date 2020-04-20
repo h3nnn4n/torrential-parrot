@@ -118,17 +118,6 @@ class PieceManager
     number_of_pieces - @pieces.values.select(&:completed?).count
   end
 
-  def random_piece_failing_integrity_check
-    return unless missing_count < 20
-
-    @pieces.values.shuffle.each do |piece|
-      next if piece.integrity_check
-
-      logger.info "\nYAY\nYAY\nYAY\nYAY\nYAY\nYAY"
-      return piece
-    end
-  end
-
   def piece_indexes_failing_hash
     indexes = []
 
