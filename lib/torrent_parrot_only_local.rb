@@ -50,7 +50,7 @@ loop do
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.025
+  sleep 0.5
 end
 
 NinjaLogger.logger.info 'Download finished'

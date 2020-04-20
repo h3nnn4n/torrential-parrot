@@ -34,12 +34,19 @@ peers.each { |peer| peer_manager.add_peer(peer) }
 
 loop do
   peer_manager.print_status
-  piece_manager.print_status
+  torrent.piece_manager.print_status
   break if peers.size.zero?
+  break if torrent.piece_manager.download_finished?
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.2
+  sleep 0.5
 end
+
+NinjaLogger.logger.info 'Download finished'
+
+raw_chunks = torrent.piece_manager.all_chunks
+file_manager = FileManager.new(torrent, raw_chunks)
+file_manager.build_files!
 
 nil
