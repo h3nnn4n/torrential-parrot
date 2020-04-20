@@ -14,7 +14,7 @@ class PeerConnection
   # FIXME
   # For now requesting more than one chunk at a time can cause a piece to be
   # processed midway through, which causes all kinds of mayhem
-  MAX_REQUESTS = 1
+  MAX_REQUESTS = 10
 
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
               :state, :chocked
@@ -76,6 +76,7 @@ class PeerConnection
   def process_message(payload)
     @message_recv_count += 1
     # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} #{payload.unpack('NC')}"
 
     case message_type(payload)
     when :keep_alive
@@ -273,15 +274,16 @@ class PeerConnection
 
   def process_piece(payload)
     dump(payload, info: 'receive_piece')
-    _, _, piece_index, chunk_offset = payload.unpack('NCNN')
-    logger.info "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} #{chunk_offset}"
-
-    chunk_data = payload[13..-1]
+    payload_size, message_id, piece_index, chunk_offset = payload.unpack('NCNN')
+    piece_size = payload_size - 9
+    chunk_data = payload[13..(payload_size + 3)]
+    logger.info "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} #{chunk_offset} of size #{piece_size}"
+    raise 'Invalid message_id' if message_id != 7
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     @pending_requests -= 1
 
-    # process_message(payload[4..-1]) if payload.size > 4
+    process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size + 4
   end
 
   def send_msg(payload)

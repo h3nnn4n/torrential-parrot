@@ -72,12 +72,26 @@ class PieceManager
 
   def last_chunk?(piece_index, chunk_offset)
     chunk_index = chunk_offset / Piece::CHUNK_SIZE
-    number_of_chunks = piece_size / Piece::CHUNK_SIZE
     piece_index == number_of_pieces - 1 && chunk_index == number_of_chunks - 1
+  end
+
+  def number_of_chunks
+    piece_size / Piece::CHUNK_SIZE
   end
 
   def last_chunk_size
     torrent_size % Piece::CHUNK_SIZE
+  end
+
+  def all_chunks
+    chunks =
+      (0..number_of_pieces).map do |piece_index|
+        (0..number_of_chunks).map do |chunk_index|
+          @pieces[piece_index].chunks[chunk_index].payload
+        end
+      end
+
+    chunks.flatten
   end
 
   def pending_chunks_count

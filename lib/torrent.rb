@@ -42,6 +42,14 @@ class Torrent
               end
   end
 
+  def single_file?
+    @bdata.dig('info', 'files').nil?
+  end
+
+  def file_name
+    @bdata['info']['name']
+  end
+
   def piece_size
     @bdata['info']['piece length']
   end

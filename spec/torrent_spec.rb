@@ -72,4 +72,20 @@ RSpec.describe Torrent do
       expect(torrent.hash_for_piece(0).unpack('h*')).to eq(hash.unpack('h*'))
     end
   end
+
+  describe '#file_name' do
+    it 'returns the file name for single file torrent' do
+      expect(torrent.file_name).to eq('potato.txt')
+    end
+  end
+
+  describe '#single_file?' do
+    it 'returns true for single file torrents' do
+      expect(torrent.single_file?).to be(true)
+    end
+
+    it 'returns true for single file torrents' do
+      expect(torrent2.single_file?).to be(false)
+    end
+  end
 end

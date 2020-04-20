@@ -23,7 +23,7 @@ class PeerManager
     return if sockets.nil?
     return if sockets.empty?
 
-    ready_to_read, = IO.select(sockets, nil, nil, 2)
+    ready_to_read, = IO.select(sockets, nil, nil, 0.5)
     # logger.info "#{ready_to_read.size} messages to read #{ready_to_read}"
 
     return if ready_to_read.nil?
