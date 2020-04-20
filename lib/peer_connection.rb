@@ -175,17 +175,28 @@ class PeerConnection
   end
 
   def request_pieces
-    request_piece while @pending_requests < MAX_REQUESTS && @state == :handshaked
+    while @pending_requests < MAX_REQUESTS && @state == :handshaked
+      piece_requested = request_piece
+      break unless piece_requested
+    end
   end
 
   def request_piece
     now = Time.now.to_i
 
     piece = piece_manager.incomplete_piece(@bitfield)
-    return @state = :finished_download if piece.nil?
+    if piece_manager.download_finished?
+      @state = :finished_download
+      return false
+    end
 
-    piece_index = piece.index
-    chunk_offset = piece.next_chunk_to_request
+    if piece.nil?
+      piece_index, chunk_offset = piece_manager.pending_chunks.sample
+    else
+      piece_index = piece.index
+      chunk_offset = piece.next_chunk_to_request
+    end
+
     is_last_chunk = piece_manager.last_chunk?(piece_index, chunk_offset)
     chunk_size = is_last_chunk ? piece_manager.last_chunk_size : Piece::CHUNK_SIZE
     message = request_message(piece_index, chunk_offset, chunk_size)

@@ -34,7 +34,7 @@ class PieceManager
   end
 
   def download_finished?
-    completed_count == number_of_pieces
+    completed_count == number_of_pieces && piece_indexes_failing_hash.size.zero?
   end
 
   def incomplete_piece(bitfield)
@@ -94,16 +94,20 @@ class PieceManager
     chunks.flatten
   end
 
-  def pending_chunks_count
-    count = 0
+  def pending_chunks
+    pending = []
 
-    @pieces.each_value do |piece|
-      piece.chunks.each_value do |chunk|
-        count += 1 if chunk.pending?
+    @pieces.each do |piece_index, piece|
+      piece.chunks.each do |chunk_index, chunk|
+        pending << [piece_index, chunk_index * Piece::CHUNK_SIZE] if chunk.pending?
       end
     end
 
-    count
+    pending
+  end
+
+  def pending_chunks_count
+    pending_chunks.count
   end
 
   def completed_count
@@ -114,12 +118,28 @@ class PieceManager
     number_of_pieces - @pieces.values.select(&:completed?).count
   end
 
-  def print_status
-    piece_indexes_failing_hash = []
+  def random_piece_failing_integrity_check
+    return unless missing_count < 20
+
+    @pieces.values.shuffle.each do |piece|
+      next if piece.integrity_check
+
+      logger.info "\nYAY\nYAY\nYAY\nYAY\nYAY\nYAY"
+      return piece
+    end
+  end
+
+  def piece_indexes_failing_hash
+    indexes = []
+
     @pieces.each_value do |piece|
-      piece_indexes_failing_hash << piece.index unless piece.integrity_check
+      indexes << piece.index unless piece.integrity_check
     end
 
+    indexes
+  end
+
+  def print_status
     data = [
       '[TRANSFER_STATUS]',
       "t: #{number_of_pieces} ",
