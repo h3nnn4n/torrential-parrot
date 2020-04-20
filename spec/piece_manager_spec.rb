@@ -25,6 +25,40 @@ RSpec.describe PieceManager do
     end
   end
 
+  describe '#last_chunk?' do
+    it 'returns false for the first chunk' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.last_chunk?(0, 0)).to be(false)
+    end
+
+    it 'returns false for the second chunk of the first piece' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.last_chunk?(1, 16_384)).to be(false)
+    end
+
+    it 'returns false for the first chunk of the last piece' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.last_chunk?(33, 0)).to be(false)
+    end
+
+    it 'returns true for the last chunk of the last piece' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.last_chunk?(33, 16_384)).to be(true)
+    end
+  end
+
+  describe '#last_chunk_size' do
+    it 'returns the correct value' do
+      manager = described_class.new(torrent_pi6)
+
+      expect(manager.last_chunk_size).to eq(13_375)
+    end
+  end
+
   describe '#torrent_size' do
     it 'is 351_272_960 for debian' do
       manager = described_class.new(torrent_debian)
@@ -61,6 +95,20 @@ RSpec.describe PieceManager do
       data = []
       data << file.slice!(0, 16_384) until file.empty?
       data
+    end
+
+    it 'returns nil if there is nothing left to do' do
+      manager = torrent.piece_manager
+
+      fake_payload = [2, 5, 1].pack('NCC')
+      bitfield = BitField.new(torrent.number_of_pieces)
+      bitfield.populate(fake_payload)
+
+      piece_payload = File.read('spec/files/downloads/potato.txt')
+      manager.request_chunk(0, 0)
+      manager.receive_chunk(0, 0, piece_payload)
+
+      expect(manager.incomplete_piece(bitfield)).to be(nil)
     end
 
     it 'returns an incomplete piece' do

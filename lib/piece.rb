@@ -13,7 +13,7 @@ class Piece
     @piece_size = piece_size
     @piece_index = piece_index
     @chunks = {}
-    @number_of_chunks = piece_size / 16_384
+    @number_of_chunks = piece_size / CHUNK_SIZE
     @piece_hash = piece_hash
   end
 
