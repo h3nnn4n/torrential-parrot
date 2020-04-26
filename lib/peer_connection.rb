@@ -150,6 +150,7 @@ class PeerConnection
 
     return if length.nil?
     return :keep_alive if length.zero?
+    return :invalid unless valid_message?(payload)
 
     case id
     when 0 then :choke
@@ -172,6 +173,22 @@ class PeerConnection
         :unknown
       end
     end
+  end
+
+  def valid_message?(payload)
+    pnamelen, pname = payload.unpack('Ca19')
+
+    if pnamelen == pstrlen && pname == pstr
+      return false if payload.size < 68
+
+      return true
+    end
+
+    length, id = payload.unpack('NC')
+
+    return false if payload.length < (length + 4)
+
+    true
   end
 
   def request_pieces
