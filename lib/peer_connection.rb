@@ -78,7 +78,8 @@ class PeerConnection
     # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
     # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} #{payload.unpack('NC')}"
 
-    case message_type(payload)
+    payload_type = message_type(payload)
+    case payload_type
     when :keep_alive
       process_keepalive(payload)
     when :choke
@@ -93,12 +94,20 @@ class PeerConnection
       process_piece(payload)
     when :handshake
       process_handshake(payload)
+    when :unkown
+      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{payload_type} not supported yet"
+      dump(payload, info: "receive_unknown_type_#{payload_type}")
+    when :invalid
+      logger.info "[PEER_CONNECTION][#{@peer_n}] sent invalid message! Killing peer!"
+      dump(payload, info: "receive_unknown_type_#{payload_type}")
+      terminate
     when nil
       @message_recv_count -= 1
       nil
     else
-      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{message_type(payload)} not supported yet"
-      dump(payload, info: "receive_unknown_type_#{message_type(payload)}")
+      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{payload_type} was not expected!"
+      dump(payload, info: "receive_unknown_type_#{payload_type}")
+      raise "Received unexpected message type #{payload_type}. Aborting"
     end
   end
 
@@ -184,7 +193,7 @@ class PeerConnection
       return true
     end
 
-    length, id = payload.unpack('NC')
+    length = payload.unpack1('N')
 
     return false if payload.length < (length + 4)
 
@@ -338,6 +347,12 @@ class PeerConnection
 
   def reopen_socket
     @socket = TCPSocket.new(@host, @port)
+  end
+
+  def terminate
+    socket.close
+    @socket = nil
+    @state = :dead
   end
 
   def logger
