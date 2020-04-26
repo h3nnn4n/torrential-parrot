@@ -251,6 +251,9 @@ class PeerConnection
   end
 
   def process_choke(payload)
+    length = payload.unpack1('N')
+    return if length != 1
+
     dump(payload, info: 'receive_choke')
     @chocked = true
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent choke"
@@ -259,6 +262,9 @@ class PeerConnection
   end
 
   def process_unchoke(payload)
+    length = payload.unpack1('N')
+    return if length != 1
+
     dump(payload, info: 'receive_unchoke')
     @chocked = false
     logger.info "[PEER_CONNECTION][#{@peer_n}] sent UNCHOKE ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°)"
@@ -267,6 +273,9 @@ class PeerConnection
   end
 
   def process_have(payload)
+    length = payload.unpack1('N')
+    return if length != 1
+
     dump(payload, info: 'receive_have')
     _, _, piece = payload.unpack('NCN')
     @bitfield.set(piece)
@@ -278,7 +287,7 @@ class PeerConnection
 
   def process_keepalive(payload)
     dump(payload, info: 'receive_keepalive')
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
 
     process_message(payload[4..-1]) if payload.size > 4
   end
