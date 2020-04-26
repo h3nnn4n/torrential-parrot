@@ -96,6 +96,37 @@ RSpec.describe PieceManager do
     end
   end
 
+  describe '#receive_chunk' do
+    it 'ignores a chunk of a piece that was not requested' do
+      manager = torrent_pi6.piece_manager
+
+      manager.request_chunk(0, 0)
+      manager.receive_chunk(0, 0, file_chunks_pi6[0])
+      manager.receive_chunk(0, 16_384, file_chunks_pi6[1])
+
+      expect(manager.completed_count).to be(0)
+    end
+
+    it 'ignores a chunk that was not requested' do
+      manager = torrent_pi6.piece_manager
+
+      manager.receive_chunk(0, 0, file_chunks_pi6[0])
+
+      expect(manager.completed_count).to be(0)
+    end
+
+    it 'receives a requested chunk' do
+      manager = torrent_pi6.piece_manager
+
+      manager.request_chunk(0, 0)
+      manager.request_chunk(0, 16_384)
+      manager.receive_chunk(0, 0, file_chunks_pi6[0])
+      manager.receive_chunk(0, 16_384, file_chunks_pi6[1])
+
+      expect(manager.completed_count).to eq(1)
+    end
+  end
+
   describe '#incomplete_piece' do
     it 'returns nil if there is nothing left to do' do
       manager = torrent.piece_manager

@@ -59,6 +59,8 @@ class PieceManager
   end
 
   def receive_chunk(piece_index, chunk_offset, payload)
+    return if @pieces[piece_index].nil?
+
     @pieces[piece_index].tap do |piece|
       piece.receive_chunk(chunk_offset, payload)
       break unless piece.completed?
