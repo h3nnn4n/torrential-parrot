@@ -75,10 +75,10 @@ class PeerConnection
 
   def process_message(payload)
     @message_recv_count += 1
-    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} -> #{payload}"
-    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{message_type(payload)} #{payload.unpack('NC')}"
-
     payload_type = message_type(payload)
+
+    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{payload_type} #{payload.unpack('NC')}"
+
     case payload_type
     when :keep_alive
       process_keepalive(payload)
@@ -94,10 +94,10 @@ class PeerConnection
       process_piece(payload)
     when :handshake
       process_handshake(payload)
-    when :unkown, :invalid
-      logger.info "[PEER_CONNECTION][#{@peer_n}] sent an #{payload_type} message! Killing peer! RIP"
+    when :unknown, :invalid
+      logger.info "[PEER_CONNECTION][#{@peer_n}] sent an #{payload_type} message!"
       dump(payload, info: "receive_unknown_type_#{payload_type}")
-      terminate
+      # terminate
     when nil
       @message_recv_count -= 1
       nil
@@ -169,9 +169,9 @@ class PeerConnection
     when 7 then :piece
     when 8 then :cancel
     else
-      _, pname = payload.unpack('Ca19')
+      pname_len, pname = payload.unpack('Ca19')
 
-      if pname == pstr && @state == :handshake_sent
+      if pname_len == pstrlen && pname == pstr
         :handshake
       else
         logger.info "[PEER_CONNECTION][#{@peer_n}] got unkown id #{id}"
@@ -326,7 +326,7 @@ class PeerConnection
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     @pending_requests -= 1
 
-    process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size + 4
+    process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size
   end
 
   def send_msg(payload)
@@ -347,7 +347,7 @@ class PeerConnection
   end
 
   def terminate
-    socket.close
+    socket.close unless @socket.nil?
     @socket = nil
     @state = :dead
   end
