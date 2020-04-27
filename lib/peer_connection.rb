@@ -94,11 +94,8 @@ class PeerConnection
       process_piece(payload)
     when :handshake
       process_handshake(payload)
-    when :unkown
-      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{payload_type} not supported yet"
-      dump(payload, info: "receive_unknown_type_#{payload_type}")
-    when :invalid
-      logger.info "[PEER_CONNECTION][#{@peer_n}] sent invalid message! Killing peer!"
+    when :unkown, :invalid
+      logger.info "[PEER_CONNECTION][#{@peer_n}] sent an #{payload_type} message! Killing peer! RIP"
       dump(payload, info: "receive_unknown_type_#{payload_type}")
       terminate
     when nil
