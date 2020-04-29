@@ -309,7 +309,7 @@ class PeerConnection
   end
 
   def process_keepalive(payload)
-    dump(payload, info: 'receive_keepalive')
+    # dump(payload, info: 'receive_keepalive')
     # logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
 
     process_message(payload[4..-1]) if payload.size > 4
