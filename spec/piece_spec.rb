@@ -101,6 +101,30 @@ RSpec.describe Piece do
 
       expect(piece.next_chunk_to_request).to be(16_384 * 2)
     end
+
+    it 'raises if too many chunks are requested' do
+      piece = described_class.new(16_384 * 4, 0)
+      (0..3).each do |index|
+        piece.request_chunk(16_384 * index)
+      end
+
+      expect { piece.next_chunk_to_request }.to raise_exception(RuntimeError)
+    end
+
+    it 'returns timeout out chunk' do
+      now = Time.now
+      piece = described_class.new(16_384 * 4, 0)
+
+      Timecop.freeze(now) do
+        (0..3).each do |index|
+          piece.request_chunk(16_384 * index)
+        end
+      end
+
+      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+        expect(piece.next_chunk_to_request).to be(0)
+      end
+    end
   end
 
   describe '#completed?' do
