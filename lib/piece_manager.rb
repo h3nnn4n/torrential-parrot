@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'config'
 require_relative 'piece'
 require_relative 'ninja_logger'
 
@@ -73,16 +74,16 @@ class PieceManager
   end
 
   def last_chunk?(piece_index, chunk_offset)
-    chunk_index = chunk_offset / Piece::CHUNK_SIZE
+    chunk_index = chunk_offset / Config.chunk_size
     piece_index == number_of_pieces - 1 && chunk_index == number_of_chunks - 1
   end
 
   def number_of_chunks
-    piece_size / Piece::CHUNK_SIZE
+    piece_size / Config.chunk_size
   end
 
   def last_chunk_size
-    torrent_size % Piece::CHUNK_SIZE
+    torrent_size % Config.chunk_size
   end
 
   def all_chunks
@@ -101,7 +102,7 @@ class PieceManager
 
     @pieces.each do |piece_index, piece|
       piece.chunks.each do |chunk_index, chunk|
-        pending << [piece_index, chunk_index * Piece::CHUNK_SIZE] if chunk.pending?
+        pending << [piece_index, chunk_index * Config.chunk_size] if chunk.pending?
       end
     end
 

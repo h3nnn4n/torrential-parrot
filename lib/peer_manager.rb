@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
+require_relative 'config'
 require_relative 'ninja_logger'
 
 class PeerManager
-  MAX_CONNECTIONS = 8
-  READ_TIMEOUT = 0.5
-
   def initialize
     @peers = []
     @msg_count = 0
@@ -16,7 +14,7 @@ class PeerManager
   end
 
   def read_and_dispatch_messages
-    if connected.count < MAX_CONNECTIONS && uninitialized.size.positive?
+    if connected.count < Config.max_peer_connetions && uninitialized.size.positive?
       peer = uninitialized.first
       peer.send_handshake
     end
@@ -24,7 +22,7 @@ class PeerManager
     return if sockets.nil?
     return if sockets.empty?
 
-    ready_to_read, = IO.select(sockets, nil, nil, READ_TIMEOUT)
+    ready_to_read, = IO.select(sockets, nil, nil, Config.peer_read_timeout)
     # logger.info "#{ready_to_read.size} messages to read #{ready_to_read}"
 
     return if ready_to_read.nil?
@@ -41,7 +39,7 @@ class PeerManager
   def print_status
     data = [
       "u: #{uninitialized.count} ",
-      "c: #{connected.count}/#{unchoked.count}/#{MAX_CONNECTIONS}",
+      "c: #{connected.count}/#{unchoked.count}/#{Config.max_peer_connetions}",
       "dead: #{dead_peers.count}",
       "a:#{@peers.count}"
     ]
@@ -54,7 +52,7 @@ class PeerManager
 
   def read_and_delegate(socket)
     data = ''
-    read_len = 1024
+    read_len = Config.block_read_size
 
     loop do
       buff = socket.recv_nonblock(read_len)

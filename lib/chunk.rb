@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_relative 'config'
+
 class Chunk
   attr_reader :payload
-
-  MAX_WAIT_TIME = 10.0 # seconds
 
   def initialize
     @requested_at = nil
@@ -36,7 +36,7 @@ class Chunk
   def timedout?
     return false if received?
 
-    requested? && Time.now - @requested_at > MAX_WAIT_TIME
+    requested? && Time.now - @requested_at > Config.chunk_request_timeout
   end
 
   def received?

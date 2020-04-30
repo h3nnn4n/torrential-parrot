@@ -3,14 +3,15 @@
 require 'bencode'
 require 'pry'
 
+require_relative 'config'
 require_relative 'ninja_logger'
 require_relative 'peer'
 require_relative 'peer_factory'
 require_relative 'peer_manager'
 require_relative 'torrent'
+require_relative 'torrent_manager'
 require_relative 'tracker'
 require_relative 'tracker_factory'
-require_relative 'torrent_manager'
 
 NinjaLogger.set_logger_to_stdout
 
@@ -40,7 +41,7 @@ loop do
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.5
+  sleep Config.main_loop_sleep_amount
 end
 
 NinjaLogger.logger.info 'Download finished'

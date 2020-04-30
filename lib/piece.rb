@@ -1,19 +1,18 @@
 # frozen_string_literal: true
 
 require_relative 'chunk'
+require_relative 'config'
 require_relative 'ninja_logger'
 
 class Piece
   attr_accessor :piece_hash
   attr_reader :chunks
 
-  CHUNK_SIZE = 16_384
-
   def initialize(piece_size, piece_index, piece_hash: nil)
     @piece_size = piece_size
     @piece_index = piece_index
     @chunks = {}
-    @number_of_chunks = piece_size / CHUNK_SIZE
+    @number_of_chunks = piece_size / Config.chunk_size
     @piece_hash = piece_hash
   end
 
@@ -57,11 +56,11 @@ class Piece
 
     raise 'Requesting too many chunks for this piece!' if missing_chunks.empty?
 
-    missing_chunks.first * CHUNK_SIZE
+    missing_chunks.first * Config.chunk_size
   end
 
   def request_chunk(chunk_offset)
-    chunk_index = chunk_offset / CHUNK_SIZE
+    chunk_index = chunk_offset / Config.chunk_size
     @chunks[chunk_index] ||= Chunk.new
     @chunks[chunk_index].request
 
@@ -69,7 +68,7 @@ class Piece
   end
 
   def receive_chunk(chunk_offset, payload)
-    chunk_index = chunk_offset / CHUNK_SIZE
+    chunk_index = chunk_offset / Config.chunk_size
     return if @chunks[chunk_index].nil?
 
     @chunks[chunk_index].receive(payload)

@@ -25,7 +25,7 @@ RSpec.describe Chunk do
         chunk.request
       end
 
-      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+      Timecop.freeze(now + Config.chunk_request_timeout + 0.5) do
         expect(chunk.timedout?).to be(true)
       end
     end
@@ -39,7 +39,7 @@ RSpec.describe Chunk do
         chunk.receive('fake_payload')
       end
 
-      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+      Timecop.freeze(now + Config.chunk_request_timeout + 0.5) do
         expect(chunk.timedout?).to be(false)
       end
     end

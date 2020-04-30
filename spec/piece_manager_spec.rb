@@ -231,7 +231,7 @@ RSpec.describe PieceManager do
       bitfield.populate(payload)
 
       piece =
-        Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+        Timecop.freeze(now + Config.chunk_request_timeout + 0.5) do
           manager.incomplete_piece(bitfield)
         end
 

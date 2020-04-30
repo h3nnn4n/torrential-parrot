@@ -117,6 +117,8 @@ RSpec.configure do |config|
 =end
 end
 
+require 'config'
+
 require 'timecop'
 require 'vcr'
 

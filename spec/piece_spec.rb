@@ -36,7 +36,7 @@ RSpec.describe Piece do
         piece.request_chunk(0)
       end
 
-      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+      Timecop.freeze(now + Config.chunk_request_timeout + 0.5) do
         expect(piece.timedout_chunks?).to be(true)
       end
     end
@@ -150,7 +150,7 @@ RSpec.describe Piece do
         end
       end
 
-      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+      Timecop.freeze(now + Config.chunk_request_timeout + 0.5) do
         expect(piece.next_chunk_to_request).to be(0)
       end
     end

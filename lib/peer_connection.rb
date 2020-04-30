@@ -5,18 +5,13 @@ require 'set'
 require 'socket'
 
 require_relative 'bit_field'
+require_relative 'config'
 require_relative 'ninja_logger'
 require_relative 'peer_messages'
 require_relative 'request_manager'
 
 class PeerConnection
   include PeerMessages
-
-  # FIXME
-  # For now requesting more than one chunk at a time can cause a piece to be
-  # processed midway through, which causes all kinds of mayhem
-  MAX_REQUESTS = 20
-  REQUEST_TIMEOUT = 10.0
 
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
               :state, :chocked
@@ -39,7 +34,6 @@ class PeerConnection
     @message_recv_count = 0
     @message_sent_count = 0
     @bitfield = BitField.new(torrent.size)
-    @request_manager = RequestManager.new(max_requests: MAX_REQUESTS, timeout: REQUEST_TIMEOUT)
 
     # logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
@@ -205,7 +199,7 @@ class PeerConnection
   end
 
   def request_pieces
-    while @request_manager.can_request? && @state == :handshaked
+    while request_manager.can_request? && @state == :handshaked
       piece_requested = request_piece
       break unless piece_requested
     end
@@ -226,7 +220,7 @@ class PeerConnection
     end
 
     is_last_chunk = piece_manager.last_chunk?(piece_index, chunk_offset)
-    chunk_size = is_last_chunk ? piece_manager.last_chunk_size : Piece::CHUNK_SIZE
+    chunk_size = is_last_chunk ? piece_manager.last_chunk_size : Config.chunk_size
     message = request_message(piece_index, chunk_offset, chunk_size)
     piece_manager.request_chunk(piece_index, chunk_offset)
 
@@ -235,7 +229,7 @@ class PeerConnection
     send_msg(message)
     dump(message, info: 'send_request_piece')
 
-    @request_manager.register_request
+    request_manager.register_request
 
     true
   end
@@ -325,11 +319,11 @@ class PeerConnection
     chunk_data = payload[13..(payload_size + 3)]
     logger.info(
       "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} " \
-      "#{chunk_offset / Piece::CHUNK_SIZE} #{chunk_offset} of size #{piece_size}"
+      "#{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
     )
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
-    @request_manager.relive_request
+    request_manager.relive_request
 
     process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size
   end
@@ -359,6 +353,13 @@ class PeerConnection
 
   def logger
     NinjaLogger.logger
+  end
+
+  def request_manager
+    @request_manager ||= RequestManager.new(
+      max_requests: Config.max_peer_requests,
+      timeout: Config.peer_request_timeout
+    )
   end
 
   def dump(data, info: '')
