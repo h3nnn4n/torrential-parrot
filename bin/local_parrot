@@ -1,17 +1,19 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bencode'
-require 'pry'
+$:.unshift(File.expand_path("#{__FILE__}/../../lib"))
 
-require_relative 'file_manager'
-require_relative 'ninja_logger'
-require_relative 'peer'
-require_relative 'peer_factory'
-require_relative 'peer_manager'
-require_relative 'torrent'
-require_relative 'torrent_manager'
-require_relative 'tracker'
-require_relative 'tracker_factory'
+require 'bencode'
+
+require 'config'
+require 'ninja_logger'
+require 'peer'
+require 'peer_factory'
+require 'peer_manager'
+require 'torrent'
+require 'torrent_manager'
+require 'tracker'
+require 'tracker_factory'
 
 NinjaLogger.set_logger_to_stdout
 
@@ -50,7 +52,7 @@ loop do
 
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
-  sleep 0.5
+  sleep Config.main_loop_sleep_amount
 end
 
 NinjaLogger.logger.info 'Download finished'
