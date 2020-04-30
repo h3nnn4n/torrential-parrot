@@ -34,6 +34,8 @@ class Chunk
   end
 
   def timedout?
+    return false if received?
+
     requested? && Time.now - @requested_at > MAX_WAIT_TIME
   end
 

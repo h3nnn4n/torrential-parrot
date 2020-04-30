@@ -29,6 +29,20 @@ RSpec.describe Chunk do
         expect(chunk.timedout?).to be(true)
       end
     end
+
+    it 'doesnt time out a received chunk' do
+      now = Time.now
+      chunk = described_class.new
+
+      Timecop.freeze(now) do
+        chunk.request
+        chunk.receive('fake_payload')
+      end
+
+      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+        expect(chunk.timedout?).to be(false)
+      end
+    end
   end
 
   describe '#request' do
