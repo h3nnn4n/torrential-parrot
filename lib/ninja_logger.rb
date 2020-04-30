@@ -9,11 +9,23 @@ class NinjaLogger
   def_delegators :logger, :info, :warn, :error, :debug, :fatal
 
   def self.set_logger_to_file
-    @logger = Logger.new(file)
+    @logger = begin
+      l = Logger.new(file)
+      l.formatter = proc do |_severity, datetime, _progname, msg|
+        "#{datetime}: #{msg}\n"
+      end
+      l
+    end
   end
 
   def self.set_logger_to_stdout
-    @logger = Logger.new(STDOUT)
+    @logger = begin
+      l = Logger.new(STDOUT)
+      l.formatter = proc do |_severity, datetime, _progname, msg|
+        "#{datetime}: #{msg}\n"
+      end
+      l
+    end
   end
 
   def self.file
@@ -21,6 +33,12 @@ class NinjaLogger
   end
 
   def self.logger
-    @logger ||= Logger.new(file)
+    @logger ||= begin
+      l = Logger.new(file)
+      l.formatter = proc do |_severity, datetime, _progname, msg|
+        "#{datetime}: #{msg}\n"
+      end
+      l
+    end
   end
 end
