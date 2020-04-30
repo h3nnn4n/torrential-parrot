@@ -34,8 +34,6 @@ class PeerConnection
     @message_recv_count = 0
     @message_sent_count = 0
     @bitfield = BitField.new(torrent.size)
-
-    # logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
 
   def socket_open?
@@ -56,9 +54,7 @@ class PeerConnection
     delta = now - @keepalive_timer
     return false unless delta >= 60
 
-    logger.debug "[#{@peer_n}] stage: #{@state}  interested: #{@interested}  " \
-                 "chocked: #{@chocked}  part_count: #{part_count}"
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sending keepalive after #{delta}"
+    log "sending keepalive after #{delta}"
 
     send_msg(keepalive_message)
     dump(keepalive_message, info: 'send_keepalive')
@@ -71,7 +67,7 @@ class PeerConnection
     @message_recv_count += 1
     payload_type = message_type(payload)
 
-    # logger.info "[PEER_CONNECTION][#{@peer_n}] got #{payload_type} #{payload.unpack('NC')}"
+    # log "got #{payload_type} #{payload.unpack('NC')}"
 
     case payload_type
     when :keep_alive
@@ -96,21 +92,21 @@ class PeerConnection
       @message_recv_count -= 1
       process_handshake(payload)
     when :unknown, :invalid
-      logger.info "[PEER_CONNECTION][#{@peer_n}] sent an #{payload_type} message!"
+      log "sent an #{payload_type} message!"
       dump(payload, info: "receive_unknown_type_#{payload_type}")
       # terminate
     when nil
       @message_recv_count -= 1
       nil
     else
-      logger.info "[PEER_CONNECTION][#{@peer_n}] message #{payload_type} was not expected!"
+      log "message #{payload_type} was not expected!"
       dump(payload, info: "receive_unknown_type_#{payload_type}")
       raise "Received unexpected message type #{payload_type}. Aborting"
     end
   end
 
   def send_interested
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sending INTERESTED"
+    log 'sending INTERESTED'
     send_msg(interested_message)
     dump(interested_message, info: 'send_interested')
     @interested = true
@@ -119,7 +115,7 @@ class PeerConnection
   def send_handshake
     @state = :sending_handshake
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] attemping to connect to peer at #{host} #{port}"
+    log "attemping to connect to peer at #{host} #{port}"
 
     Timeout.timeout(2) do
       if socket.nil?
@@ -131,7 +127,7 @@ class PeerConnection
       dump(handshake_message, info: 'send_handshake')
       # send_msg(keepalive_message)
 
-      logger.info "[PEER_CONNECTION][#{@peer_n}] sent hanshake"
+      log 'sent hanshake'
       @state = :handshake_sent
     end
 
@@ -175,7 +171,7 @@ class PeerConnection
       if pname_len == pstrlen && pname == pstr
         :handshake
       else
-        logger.info "[PEER_CONNECTION][#{@peer_n}] got unkown id #{id}"
+        log "got unkown id #{id}"
         dump(payload, info: 'receive_unknown')
         :unknown
       end
@@ -224,7 +220,7 @@ class PeerConnection
     message = request_message(piece_index, chunk_offset, chunk_size)
     piece_manager.request_chunk(piece_index, chunk_offset)
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
+    log "requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
 
     send_msg(message)
     dump(message, info: 'send_request_piece')
@@ -250,7 +246,7 @@ class PeerConnection
 
     raise "#{remote_info_hash} is not #{info_hash} quiting" unless remote_info_hash == info_hash
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] handshake successful! #{payload.size}"
+    log "handshake successful! #{payload.size}"
 
     @state = :handshaked
 
@@ -265,7 +261,7 @@ class PeerConnection
 
     @bitfield.populate(payload[0..bitfield_length])
 
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sent bitfield of size #{length}"
+    log "sent bitfield of size #{length}"
 
     process_message(payload[bitfield_length..-1]) if payload.size > bitfield_length
   end
@@ -276,7 +272,7 @@ class PeerConnection
 
     dump(payload, info: 'receive_choke')
     @chocked = true
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sent choke"
+    log 'sent choke'
 
     process_message(payload[5..-1]) if payload.size > 5
   end
@@ -287,7 +283,7 @@ class PeerConnection
 
     dump(payload, info: 'receive_unchoke')
     @chocked = false
-    logger.info "[PEER_CONNECTION][#{@peer_n}] sent UNCHOKE ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°)"
+    log 'sent UNCHOKE ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°) ( ͡° ͜ʖ ͡°)'
 
     process_message(payload[5..-1]) if payload.size > 5
   end
@@ -300,14 +296,14 @@ class PeerConnection
     _, _, piece = payload.unpack('NCN')
     @bitfield.set(piece)
 
-    # logger.info "[PEER_CONNECTION][#{@peer_n}] has piece #{piece}"
+    # log "has piece #{piece}"
 
     process_message(payload[9..-1]) if payload.size > 9
   end
 
   def process_keepalive(payload)
     # dump(payload, info: 'receive_keepalive')
-    # logger.info "[PEER_CONNECTION][#{@peer_n}] sent keeplive"
+    # log "sent keeplive"
 
     process_message(payload[4..-1]) if payload.size > 4
   end
@@ -317,10 +313,7 @@ class PeerConnection
     payload_size, _message_id, piece_index, chunk_offset = payload.unpack('NCNN')
     piece_size = payload_size - 9
     chunk_data = payload[13..(payload_size + 3)]
-    logger.info(
-      "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} " \
-      "#{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
-    )
+    log "got piece #{piece_index} #{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     request_manager.relive_request
@@ -349,6 +342,12 @@ class PeerConnection
     socket.close unless @socket.nil?
     @socket = nil
     @state = :dead
+  end
+
+  def log(msg)
+    prefix = "[PEER_CONNECTION][#{@peer_n}][#{@message_recv_count + @message_sent_count}] "
+
+    logger.info(prefix + msg)
   end
 
   def logger
