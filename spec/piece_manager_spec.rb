@@ -205,6 +205,38 @@ RSpec.describe PieceManager do
 
       expect(piece.index).to eq(0)
     end
+
+    it 'returns pieces that had a timeout' do
+      now = Time.now
+
+      manager = torrent_pi6.piece_manager
+
+      Timecop.freeze(now) do
+        manager.request_chunk(0, 0)
+        manager.request_chunk(0, 16_384)
+        # manager.receive_chunk(0, 0, file_chunks_pi6[0])
+        manager.receive_chunk(0, 16_384, file_chunks_pi6[1])
+
+        manager.request_chunk(1, 0)
+        manager.request_chunk(1, 16_384)
+        manager.receive_chunk(1, 0, file_chunks_pi6[2])
+        manager.receive_chunk(1, 16_384, file_chunks_pi6[3])
+
+        manager.request_chunk(2, 0)
+        manager.receive_chunk(2, 0, file_chunks_pi6[4])
+      end
+
+      payload = File.read('spec/files/peer_messages/pi6_bitfield.dat')
+      bitfield = BitField.new(torrent_pi6.number_of_pieces)
+      bitfield.populate(payload)
+
+      piece =
+        Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+          manager.incomplete_piece(bitfield)
+        end
+
+      expect(piece.index).to eq(0)
+    end
   end
 
   describe '#download_finished?' do

@@ -26,14 +26,14 @@ class Chunk
   end
 
   def pending?
-    @pending && !timeout_out?
+    @pending && !timedout?
   end
 
   def requested?
     @requested
   end
 
-  def timeout_out?
+  def timedout?
     requested? && Time.now - @requested_at > MAX_WAIT_TIME
   end
 

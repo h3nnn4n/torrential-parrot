@@ -41,8 +41,8 @@ class PieceManager
     bitfield.all_bits_set_index.each do |piece_index|
       @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
       @pieces[piece_index].tap do |piece|
-        next piece unless piece.missing_chunk?
-        next piece unless piece.unrequested_chunk?
+        next piece unless piece.missing_chunk? || piece.timedout_chunks?
+        next piece unless piece.unrequested_chunk? || piece.timedout_chunks?
 
         return piece
       end

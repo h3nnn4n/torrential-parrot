@@ -39,6 +39,10 @@ class Piece
     @chunks.values.none?(&:requested?)
   end
 
+  def timedout_chunks?
+    @chunks.values.any?(&:timedout?)
+  end
+
   def at_least_one_request?
     @chunks.size.positive?
   end
@@ -47,7 +51,7 @@ class Piece
     missing_chunks = []
     (0..(@number_of_chunks - 1)).each do |chunk_index|
       @chunks[chunk_index].tap do |chunk|
-        missing_chunks << chunk_index if chunk.nil? || chunk.timeout_out?
+        missing_chunks << chunk_index if chunk.nil? || chunk.timedout?
       end
     end
 

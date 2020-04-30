@@ -13,6 +13,35 @@ RSpec.describe Piece do
     end
   end
 
+  describe '#timedout_chunks?' do
+    it 'returns false when nothing was ever requested' do
+      piece = described_class.new(16_384 * 2, 0)
+
+      expect(piece.timedout_chunks?).to be(false)
+    end
+
+    it 'returns false when there is nothing pending' do
+      piece = described_class.new(16_384 * 3, 0)
+      piece.request_chunk(0)
+
+      expect(piece.timedout_chunks?).to be(false)
+    end
+
+    it 'returns true when a chunk timed out' do
+      now = Time.now
+
+      piece = described_class.new(16_384 * 3, 0)
+
+      Timecop.freeze(now) do
+        piece.request_chunk(0)
+      end
+
+      Timecop.freeze(now + Chunk::MAX_WAIT_TIME + 0.5) do
+        expect(piece.timedout_chunks?).to be(true)
+      end
+    end
+  end
+
   describe '#unrequested_chunk?' do
     it 'returns true if all chunks are empty' do
       piece = described_class.new(16_384, 0)
