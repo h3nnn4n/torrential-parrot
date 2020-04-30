@@ -84,7 +84,7 @@ class Piece
     return false if piece_hash.nil?
 
     check = piece_hash.unpack1('H*') == Digest::SHA1.hexdigest(data)
-    logger.warn "[PIECE_MANAGER] Integrity check failed for piece #{@piece_index}" unless check
+    # logger.warn "[PIECE_MANAGER] Integrity check failed for piece #{@piece_index}" unless check
     check
   end
 
