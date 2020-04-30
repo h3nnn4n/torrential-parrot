@@ -7,6 +7,7 @@ require 'socket'
 require_relative 'bit_field'
 require_relative 'ninja_logger'
 require_relative 'peer_messages'
+require_relative 'request_manager'
 
 class PeerConnection
   include PeerMessages
@@ -14,7 +15,8 @@ class PeerConnection
   # FIXME
   # For now requesting more than one chunk at a time can cause a piece to be
   # processed midway through, which causes all kinds of mayhem
-  MAX_REQUESTS = 20
+  MAX_REQUESTS = 1
+  REQUEST_TIMEOUT = 10.0
 
   attr_reader :info_hash, :my_peer_id, :remote_peer_id, :host, :port,
               :state, :chocked
@@ -36,10 +38,8 @@ class PeerConnection
     @drops_count = 0
     @message_recv_count = 0
     @message_sent_count = 0
-    @requested_count = 0
-    @pending_requests = 0
-    @requested_timer = Time.now.to_i
     @bitfield = BitField.new(torrent.size)
+    @request_manager = RequestManager.new(max_requests: MAX_REQUESTS, timeout: REQUEST_TIMEOUT)
 
     # logger.info "[PEER_CONNECTION] Created for #{host}:#{port}"
   end
@@ -93,6 +93,8 @@ class PeerConnection
     when :piece
       process_piece(payload)
     when :handshake
+      # HACK: this just helps debuging when a message is missparsed. Remove this later
+      @message_recv_count -= 1
       process_handshake(payload)
     when :unknown, :invalid
       logger.info "[PEER_CONNECTION][#{@peer_n}] sent an #{payload_type} message!"
@@ -198,15 +200,13 @@ class PeerConnection
   end
 
   def request_pieces
-    while @pending_requests < MAX_REQUESTS && @state == :handshaked
+    while @request_manager.can_request? && @state == :handshaked
       piece_requested = request_piece
       break unless piece_requested
     end
   end
 
   def request_piece
-    now = Time.now.to_i
-
     piece = piece_manager.incomplete_piece(@bitfield)
     if piece_manager.download_finished?
       @state = :finished_download
@@ -230,9 +230,7 @@ class PeerConnection
     send_msg(message)
     dump(message, info: 'send_request_piece')
 
-    @requested_count += 1
-    @pending_requests += 1
-    @requested_timer = now
+    @request_manager.register_request
 
     true
   end
@@ -324,7 +322,7 @@ class PeerConnection
     raise 'Invalid message_id' if message_id != 7
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
-    @pending_requests -= 1
+    @request_manager.relive_request
 
     process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size
   end

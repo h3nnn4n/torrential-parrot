@@ -3,7 +3,7 @@
 class Chunk
   attr_reader :payload
 
-  MAX_WAIT_TIME = 3 # seconds
+  MAX_WAIT_TIME = 10.0 # seconds
 
   def initialize
     @requested_at = nil

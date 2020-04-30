@@ -83,6 +83,13 @@ RSpec.describe PeerConnection do
 
       expect(connection.valid_message?(message)).to be(true)
     end
+
+    it 'returns false for a invalid piece' do
+      message = File.read('spec/files/peer_messages/receive_piece/invalid_piece.dat')
+      connection = described_class.new('127.0.0.1', 6881, torrent_debian, peer_id)
+
+      expect(connection.valid_message?(message)).to be(false)
+    end
   end
 
   describe '#process_piece WIP' do
