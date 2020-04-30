@@ -92,7 +92,7 @@ class PeerConnection
       process_have(payload)
     when :piece
       process_piece(payload)
-    when :cancel, :interested, :uninterested
+    when :cancel, :interested, :uninterested, :request
       # FIXME: Do nothing
       # This was added just so the app doesnt die because it recieved an unexpected message.
       # For now there is nothing being done wiht these messages
