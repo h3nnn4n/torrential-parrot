@@ -324,7 +324,7 @@ class PeerConnection
     piece_size = payload_size - 9
     chunk_data = payload[13..(payload_size + 3)]
     logger.info(
-      "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index}" \
+      "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} " \
       "#{chunk_offset / Piece::CHUNK_SIZE} #{chunk_offset} of size #{piece_size}"
     )
 
