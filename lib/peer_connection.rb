@@ -320,11 +320,13 @@ class PeerConnection
 
   def process_piece(payload)
     dump(payload, info: 'receive_piece')
-    payload_size, message_id, piece_index, chunk_offset = payload.unpack('NCNN')
+    payload_size, _message_id, piece_index, chunk_offset = payload.unpack('NCNN')
     piece_size = payload_size - 9
     chunk_data = payload[13..(payload_size + 3)]
-    logger.info "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index} #{chunk_offset} of size #{piece_size}"
-    raise 'Invalid message_id' if message_id != 7
+    logger.info(
+      "[PEER_CONNECTION][#{@peer_n}] got piece #{piece_index}" \
+      "#{chunk_offset / Piece::CHUNK_SIZE} #{chunk_offset} of size #{piece_size}"
+    )
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     @request_manager.relive_request
