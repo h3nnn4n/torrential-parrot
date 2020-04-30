@@ -92,6 +92,12 @@ class PeerConnection
       process_have(payload)
     when :piece
       process_piece(payload)
+    when :cancel
+      # FIXME: Do nothing
+      # This was added just so the app doesnt die because it recieved an unexpected message.
+      # For now there should be no situation where we receive this message. Yet somehow
+      # we do. Mostly due to a bug (parsing a messag wrong).
+      nil
     when :handshake
       # HACK: this just helps debuging when a message is missparsed. Remove this later
       @message_recv_count -= 1
