@@ -130,6 +130,27 @@ class PieceManager
     indexes
   end
 
+  def chunk_status
+    piece_index = piece_indexes_failing_hash.first
+    return if piece_index.nil?
+
+    piece = @pieces[piece_index]
+
+    status = piece.chunks.values.map do |chunk|
+      if chunk.pending?
+        'P'
+      elsif chunk.timedout?
+        'T'
+      elsif chunk.received?
+        '.'
+      else
+        '?'
+      end
+    end
+
+    status.join
+  end
+
   def print_status
     data = [
       '[TRANSFER_STATUS]',
@@ -138,7 +159,8 @@ class PieceManager
       "m: #{missing_count} ",
       "p: #{pending_chunks_count} ",
       "%: #{(completed_count.to_f / number_of_pieces * 100.0).round(2)}% ",
-      "f: #{piece_indexes_failing_hash} "
+      "f: #{piece_indexes_failing_hash} ",
+      "#{piece_indexes_failing_hash.first} #{chunk_status}"
     ]
 
     msg = data.join(' ')
