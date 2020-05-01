@@ -34,7 +34,7 @@ class PeerConnection
     @message_recv_count = 0
     @message_sent_count = 0
     @last_piece_received_at = Time.now
-    @bitfield = BitField.new(torrent.size)
+    @bitfield = BitField.new(torrent.number_of_pieces)
   end
 
   def socket_open?
@@ -266,6 +266,8 @@ class PeerConnection
     log "sent bitfield of size #{length}"
 
     process_message(payload[bitfield_length..-1]) if payload.size > bitfield_length
+  rescue RuntimeError
+    false
   end
 
   def process_choke(payload)

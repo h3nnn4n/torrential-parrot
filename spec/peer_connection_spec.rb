@@ -6,6 +6,15 @@ require 'peer_connection'
 RSpec.describe PeerConnection do
   peer_id = '00000000000000000000'
 
+  def build_peer
+    peer_id = '00000000000000000000'
+    message = File.read('spec/files/peer_messages/receive_handshake/10_2_receive_handshake.dat')[0..67]
+    connection = described_class.new('127.0.0.1', 6881, torrent_debian, peer_id)
+    connection.process_message(message)
+
+    connection
+  end
+
   describe '#initialize' do
     it 'initializes without exploding' do
       described_class.new('127.0.0.1', 6881, torrent, peer_id)
@@ -57,6 +66,26 @@ RSpec.describe PeerConnection do
       connection.process_message(message)
 
       expect(connection.state).to be(:handshaked)
+    end
+  end
+
+  describe '#process_bitfield' do
+    it 'sets the number of parts from a valid bitfield message' do
+      payload = File.read('spec/files/peer_messages/receive_bitfield/pi6_bitfield.dat')
+
+      connection = build_peer
+      connection.process_message(payload)
+
+      expect(connection.part_count).to be(34)
+    end
+
+    it 'sets state to :handshaked' do
+      payload = File.read('spec/files/peer_messages/receive_bitfield/corrupt_bitfield.dat')
+
+      connection = build_peer
+      connection.process_message(payload)
+
+      expect(connection.part_count).to be(0)
     end
   end
 
