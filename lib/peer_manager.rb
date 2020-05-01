@@ -57,6 +57,10 @@ class PeerManager
     logger.info msg
   end
 
+  def needs_more_peers?
+    uninitialized.count.zero? && connected.count < Config.max_peer_connetions
+  end
+
   private
 
   def read_and_delegate(socket)

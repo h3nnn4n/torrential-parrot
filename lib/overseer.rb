@@ -28,6 +28,11 @@ class Overseer
       break if @peers.size.zero?
       break if @torrent.piece_manager.download_finished?
 
+      if peer_manager.needs_more_peers?
+        fetch_new_peers_from_tracker
+        add_peers_to_peer_manager
+      end
+
       peer_manager.update_peers
       peer_manager.read_and_dispatch_messages
       peer_manager.send_messages
