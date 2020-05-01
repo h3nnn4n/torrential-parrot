@@ -154,8 +154,7 @@ class PeerConnection
 
     return if length.nil?
     return :keep_alive if length.zero?
-
-    # return :invalid unless valid_message?(payload)
+    return :invalid unless valid_message?(payload)
 
     case id
     when 0 then :choke
