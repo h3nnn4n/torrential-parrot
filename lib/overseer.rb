@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'config'
+require 'file_manager'
 require 'overseer'
 require 'peer'
 require 'peer_factory'
