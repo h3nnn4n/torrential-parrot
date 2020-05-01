@@ -150,6 +150,14 @@ RSpec.describe BitField do
 
       expect(bit_field.everything_set?).to be(true)
     end
+
+    it 'raises with bitfield length is too long' do
+      fake_payload = ([10_000, 5] + [5] * 10_000).pack('NC*')
+
+      bit_field = described_class.new(torrent_pi6.number_of_pieces)
+
+      expect { bit_field.populate(fake_payload) }.to raise_exception(RuntimeError)
+    end
   end
 
   describe '#byte_to_bits' do

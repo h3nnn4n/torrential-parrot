@@ -69,6 +69,10 @@ class BitField
 
         @bits[bit_count] = true
         last_set_bit = bit_count if bit_count > last_set_bit
+
+        next unless last_set_bit > @length - 1
+
+        raise "Bitfield bits count doesnt match torrent number of pieces! #{last_set_bit} #{@length}"
       end
     end
 
