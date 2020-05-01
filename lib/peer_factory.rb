@@ -8,6 +8,7 @@ class PeerFactory
   def initialize(trackers, torrent)
     @trackers = trackers
     @torrent = torrent
+    @last_peer_id = 0
 
     @peer_ips = Set.new
   end
@@ -33,7 +34,7 @@ class PeerFactory
           port,
           @torrent,
           tracker.peer_id,
-          peer_n: @peer_ips.size - 1
+          peer_n: get_next_peer_n
         )
       end
     end
@@ -41,5 +42,9 @@ class PeerFactory
     peers.compact!
 
     peers
+  end
+
+  def get_next_peer_n
+    @last_peer_id += 1
   end
 end
