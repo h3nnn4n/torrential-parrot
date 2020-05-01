@@ -7,7 +7,7 @@ class Config
 
   # If a peer doesnt send any valid piece in X amount of time terminate it
   def self.peer_idle_timeout
-    config_from_file[__method__.to_s] || 60
+    config_from_file[__method__.to_s] || 180
   end
 
   # How many piece requests we can have pending at once, per peer
