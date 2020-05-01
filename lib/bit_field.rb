@@ -57,6 +57,9 @@ class BitField
 
     @payload_length = payload.unpack1('N')
     bitfield_length = 4 + @payload_length
+
+    raise 'Bitfield size does not match torrent!' if (@length.to_f / 8).ceil > @length
+
     bytes = payload[5..bitfield_length].unpack('C*')
 
     last_set_bit = 0
