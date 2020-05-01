@@ -49,7 +49,7 @@ class PeerManager
     data = [
       "u: #{uninitialized.count} ",
       "c: #{connected.count}/#{unchoked.count}/#{Config.max_peer_connetions}",
-      "dead: #{dead_peers.count}",
+      "dead: #{dead.count}",
       "a:#{@peers.count}"
     ]
 
@@ -59,6 +59,10 @@ class PeerManager
 
   def needs_more_peers?
     uninitialized.count.zero? && connected.count < Config.max_peer_connetions
+  end
+
+  def recycle_dead_peers
+    dead.each(&:recycle)
   end
 
   private
@@ -111,7 +115,7 @@ class PeerManager
       .select { |a| a.state == :handshaked }
   end
 
-  def dead_peers
+  def dead
     @peers
       .map(&:connection)
       .select { |a| a.state == :dead }

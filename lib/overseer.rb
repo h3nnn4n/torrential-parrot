@@ -29,6 +29,7 @@ class Overseer
       break if @torrent.piece_manager.download_finished?
 
       if peer_manager.needs_more_peers?
+        recycle_dead_peers
         fetch_new_peers_from_tracker
         add_peers_to_peer_manager
       end

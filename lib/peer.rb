@@ -27,7 +27,17 @@ class Peer
   end
 
   def connection
-    @connection ||= PeerConnection.new(
+    @connection ||= build_connection
+  end
+
+  def recycle
+    @connection = build_connection
+  end
+
+  private
+
+  def build_connection
+    PeerConnection.new(
       @host,
       @port,
       @torrent,
@@ -35,8 +45,6 @@ class Peer
       peer_n: @peer_n
     )
   end
-
-  private
 
   def logger
     NinjaLogger.logger
