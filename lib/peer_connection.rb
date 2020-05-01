@@ -220,7 +220,7 @@ class PeerConnection
     message = request_message(piece_index, chunk_offset, chunk_size)
     piece_manager.request_chunk(piece_index, chunk_offset)
 
-    log "requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
+    # log "requesting piece #{piece_index} #{chunk_offset} #{chunk_size}"
 
     send_msg(message)
     dump(message, info: 'send_request_piece')
@@ -313,7 +313,7 @@ class PeerConnection
     payload_size, _message_id, piece_index, chunk_offset = payload.unpack('NCNN')
     piece_size = payload_size - 9
     chunk_data = payload[13..(payload_size + 3)]
-    log "got piece #{piece_index} #{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
+    # log "got piece #{piece_index} #{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
 
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     request_manager.relive_request
