@@ -72,14 +72,14 @@ class PeerConnection
 
     case payload_type
     when :keep_alive
+      # HACK: this just helps debuging when a message is missparsed. Remove this later
+      @message_recv_count -= 1
       process_keepalive(payload)
     when :choke
       process_choke(payload)
     when :unchoke
       process_unchoke(payload)
     when :bitfield
-      # HACK: this just helps debuging when a message is missparsed. Remove this later
-      @message_recv_count -= 1
       process_bitfield(payload)
     when :have
       process_have(payload)
