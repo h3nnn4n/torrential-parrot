@@ -4,6 +4,7 @@ require 'logger'
 require 'socket'
 require 'uri'
 
+require_relative 'config'
 require_relative 'ninja_logger'
 
 class BaseTracker
@@ -17,8 +18,8 @@ class BaseTracker
     @bytes_downloaded = 0
     @bytes_uploaded = 0
     @bytes_left = 0
-    @listen_port = 6881
-    @wanted_peers = 100
+    @listen_port = Config.listen_port
+    @wanted_peers = Config.number_of_peers_from_announce
 
     logger.info "peer_id: #{peer_id}"
     logger.info "tracker: #{tracker_s}"

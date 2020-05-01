@@ -5,6 +5,15 @@ require 'yaml'
 class Config
   CONFIG_PATH = './config.yml'
 
+  def self.listen_port
+    config_from_file[__method__.to_s] || 6881
+  end
+
+  # How many peers are requested when announcing to each tracker
+  def self.number_of_peers_from_announce
+    config_from_file[__method__.to_s] || 100
+  end
+
   # If a peer doesnt send any valid piece in X amount of time terminate it
   def self.peer_idle_timeout
     config_from_file[__method__.to_s] || 180
