@@ -71,7 +71,7 @@ class PeerManager
       data += buff
 
       break if buff.size < read_len
-    rescue Errno::ECONNRESET, IO::EAGAINWaitReadable
+    rescue Errno::ECONNRESET, Errno::ENETUNREACH, IO::EAGAINWaitReadable
       # FIXME: I think the correct way to treat the IO exception is to call
       # IO.select again For now lets just ignore it and discart any partial
       # messages that we get from it
