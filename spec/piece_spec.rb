@@ -199,6 +199,24 @@ RSpec.describe Piece do
       expect(piece.completed?).to be(false)
     end
 
+    it 'returns false if last chunk times out' do
+      now = Time.now
+      piece = described_class.new(16_384 * 4, 0)
+
+      Timecop.freeze(now) do
+        (0..2).each do |i|
+          piece.request_chunk(16_384 * i)
+          piece.receive_chunk(16_384 * i, fake_payload)
+        end
+
+        piece.request_chunk(16_384 * 3)
+      end
+
+      Timecop.freeze(now + Config.chunk_request_timeout + 1) do
+        expect(piece.completed?).to be(false)
+      end
+    end
+
     it 'returns true if all chunks are present' do
       piece = described_class.new(16_384 * 4, 0)
 

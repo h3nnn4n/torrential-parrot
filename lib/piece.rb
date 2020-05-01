@@ -25,10 +25,13 @@ class Piece
   end
 
   def missing_chunk?
-    return true if @chunks.size.zero?
     return true if @chunks.size < @number_of_chunks
 
-    @chunks.values.none?(&:received?) || @chunks.values.any?(&:pending?)
+    (
+      @chunks.values.none?(&:received?) ||
+      @chunks.values.any?(&:pending?) ||
+      @chunks.values.any?(&:timedout?)
+    )
   end
 
   def unrequested_chunk?
