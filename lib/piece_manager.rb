@@ -162,8 +162,8 @@ class PieceManager
       "c: #{completed_count} ",
       "m: #{missing_count} ",
       "p: #{pending_chunks_count} ",
+      "f: #{piece_indexes_failing_hash.count} ",
       "%: #{(completed_count.to_f / number_of_pieces * 100.0).round(2)}% ",
-      "f: #{piece_indexes_failing_hash} ",
       "#{piece_indexes_failing_hash.first} #{chunk_status}"
     ]
 

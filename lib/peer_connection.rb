@@ -77,6 +77,8 @@ class PeerConnection
     when :unchoke
       process_unchoke(payload)
     when :bitfield
+      # HACK: this just helps debuging when a message is missparsed. Remove this later
+      @message_recv_count -= 1
       process_bitfield(payload)
     when :have
       process_have(payload)
@@ -88,11 +90,9 @@ class PeerConnection
       # For now there is nothing being done wiht these messages
       nil
     when :handshake
-      # HACK: this just helps debuging when a message is missparsed. Remove this later
-      @message_recv_count -= 1
       process_handshake(payload)
     when :unknown, :invalid
-      log "sent an #{payload_type} message!"
+      # log "sent an #{payload_type} message!"
       dump(payload, info: "receive_unknown_type_#{payload_type}")
       # terminate
     when nil
@@ -172,7 +172,7 @@ class PeerConnection
       if pname_len == pstrlen && pname == pstr
         :handshake
       else
-        log "got unkown id #{id}"
+        # log "got unkown id #{id}"
         dump(payload, info: 'receive_unknown')
         :unknown
       end
@@ -312,7 +312,7 @@ class PeerConnection
   def process_piece(payload)
     dump(payload, info: 'receive_piece')
     payload_size, _message_id, piece_index, chunk_offset = payload.unpack('NCNN')
-    piece_size = payload_size - 9
+    # piece_size = payload_size - 9,
     chunk_data = payload[13..(payload_size + 3)]
     # log "got piece #{piece_index} #{chunk_offset / Config.chunk_size} #{chunk_offset} of size #{piece_size}"
 
