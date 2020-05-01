@@ -34,7 +34,7 @@ class PeerFactory
           port,
           @torrent,
           tracker.peer_id,
-          peer_n: get_next_peer_n
+          peer_n: next_peer_n
         )
       end
     end
@@ -44,7 +44,7 @@ class PeerFactory
     peers
   end
 
-  def get_next_peer_n
+  def next_peer_n
     @last_peer_id += 1
   end
 end
