@@ -349,6 +349,22 @@ RSpec.describe PieceManager do
 
         expect(manager.completed_count).to eq(0)
       end
+
+      it 'succeds integrity check after piece is reset and re-requested' do
+        manager = torrent_pi6.piece_manager
+
+        manager.request_chunk(0, 0)
+        manager.request_chunk(0, 16_384)
+        manager.receive_chunk(0, 0, file_chunks_pi6[0])
+        manager.receive_chunk(0, 16_384, 'this is totally the wrong payload')
+
+        manager.request_chunk(0, 0)
+        manager.request_chunk(0, 16_384)
+        manager.receive_chunk(0, 0, file_chunks_pi6[0])
+        manager.receive_chunk(0, 16_384, file_chunks_pi6[1])
+
+        expect(manager.completed_count).to eq(1)
+      end
     end
   end
 

@@ -263,8 +263,8 @@ RSpec.describe Piece do
       end
 
       it 'passes integrity check' do
-        piece = described_class.new(16_384 * 4, 0)
-        piece.piece_hash = torrent_pi6.hash_for_piece(0)
+        hash = torrent_pi6.hash_for_piece(0)
+        piece = described_class.new(16_384 * 2, 0, piece_hash: hash)
         piece.request_chunk(0)
         piece.receive_chunk(0, file_chunks[0])
         piece.request_chunk(16_384)
@@ -273,9 +273,27 @@ RSpec.describe Piece do
         expect(piece.integrity_check).to be(true)
       end
 
+      it 'fails integrity check' do
+        hash = torrent_pi6.hash_for_piece(0)
+        piece = described_class.new(16_384 * 2, 0, piece_hash: hash)
+        piece.request_chunk(0)
+        piece.receive_chunk(0, 'dummy')
+        piece.request_chunk(16_384)
+        piece.receive_chunk(16_384, file_chunks[1])
+
+        expect(piece.integrity_check).to be(false)
+      end
+
+      it 'fails on an empty piece' do
+        hash = torrent_pi6.hash_for_piece(0)
+        piece = described_class.new(16_384 * 2, 0, piece_hash: hash)
+
+        expect(piece.integrity_check).to be(false)
+      end
+
       it 'fails on a chunk piece' do
-        piece = described_class.new(16_384 * 4, 0)
-        piece.piece_hash = torrent_pi6.hash_for_piece(0)
+        hash = torrent_pi6.hash_for_piece(0)
+        piece = described_class.new(16_384 * 2, 0, piece_hash: hash)
         piece.request_chunk(0)
 
         expect(piece.integrity_check).to be(false)
