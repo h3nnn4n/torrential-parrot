@@ -34,36 +34,74 @@ RSpec.describe PieceManager do
   end
 
   describe '#last_chunk?' do
-    it 'returns false for the first chunk' do
-      manager = described_class.new(torrent_pi6)
+    describe 'pi6' do
+      it 'returns false for the first chunk' do
+        manager = described_class.new(torrent_pi6)
 
-      expect(manager.last_chunk?(0, 0)).to be(false)
+        expect(manager.last_chunk?(0, 0)).to be(false)
+      end
+
+      it 'returns false for the second chunk of the first piece' do
+        manager = described_class.new(torrent_pi6)
+
+        expect(manager.last_chunk?(1, 16_384)).to be(false)
+      end
+
+      it 'returns false for the first chunk of the last piece' do
+        manager = described_class.new(torrent_pi6)
+
+        expect(manager.last_chunk?(33, 0)).to be(false)
+      end
+
+      it 'returns true for the last chunk of the last piece' do
+        manager = described_class.new(torrent_pi6)
+
+        expect(manager.last_chunk?(33, 16_384)).to be(true)
+      end
     end
 
-    it 'returns false for the second chunk of the first piece' do
-      manager = described_class.new(torrent_pi6)
+    describe 'debian' do
+      it 'returns false for the first chunk' do
+        manager = described_class.new(torrent_debian)
 
-      expect(manager.last_chunk?(1, 16_384)).to be(false)
-    end
+        expect(manager.last_chunk?(0, 0)).to be(false)
+      end
 
-    it 'returns false for the first chunk of the last piece' do
-      manager = described_class.new(torrent_pi6)
+      it 'returns false for the second chunk of the first piece' do
+        manager = described_class.new(torrent_debian)
 
-      expect(manager.last_chunk?(33, 0)).to be(false)
-    end
+        expect(manager.last_chunk?(1, 16_384 * 15)).to be(false)
+      end
 
-    it 'returns true for the last chunk of the last piece' do
-      manager = described_class.new(torrent_pi6)
+      it 'returns false for the first chunk of the last piece' do
+        manager = described_class.new(torrent_debian)
 
-      expect(manager.last_chunk?(33, 16_384)).to be(true)
+        expect(manager.last_chunk?(1339, 0)).to be(false)
+      end
+
+      it 'returns true for the last chunk of the last piece' do
+        manager = described_class.new(torrent_debian)
+
+        expect(manager.last_chunk?(1339, 16_384 * 15)).to be(true)
+      end
     end
   end
 
   describe '#last_chunk_size' do
-    it 'returns the correct value' do
-      manager = described_class.new(torrent_pi6)
+    describe 'pi6' do
+      it 'returns the correct value' do
+        manager = described_class.new(torrent_pi6)
 
-      expect(manager.last_chunk_size).to eq(13_375)
+        expect(manager.last_chunk_size).to eq(13_375)
+      end
+    end
+
+    describe 'debian' do
+      it 'returns the correct value' do
+        manager = described_class.new(torrent_debian)
+
+        expect(manager.last_chunk_size).to eq(16_384)
+      end
     end
   end
 

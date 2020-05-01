@@ -51,6 +51,16 @@ RSpec.describe Torrent do
     end
   end
 
+  describe '#number_of_pieces' do
+    it 'returns the total file size for single file torrent' do
+      expect(torrent.number_of_pieces).to eq(1)
+    end
+
+    it 'returns the total file size for big single file torrent' do
+      expect(torrent_debian.number_of_pieces).to eq(1340)
+    end
+  end
+
   describe '#size' do
     it 'returns the total file size for single file torrent' do
       expect(torrent.size).to eq(42)

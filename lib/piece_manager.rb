@@ -83,7 +83,10 @@ class PieceManager
   end
 
   def last_chunk_size
-    torrent_size % Config.chunk_size
+    size = torrent_size % Config.chunk_size
+    return size unless size.zero?
+
+    Config.chunk_size
   end
 
   def all_chunks
