@@ -5,15 +5,9 @@ $:.unshift(File.expand_path("#{__FILE__}/../../lib"))
 
 require 'bencode'
 
-require 'config'
 require 'ninja_logger'
-require 'peer'
-require 'peer_factory'
-require 'peer_manager'
+require 'overseer'
 require 'torrent'
-require 'torrent_manager'
-require 'tracker'
-require 'tracker_factory'
 
 NinjaLogger.set_logger_to_stdout
 
@@ -24,35 +18,7 @@ torrent_info = BEncode.load(data)
 
 torrent = Torrent.new(torrent_info, data)
 
-TorrentManager.add_torrent(torrent)
-
-tracker_factory = TrackerFactory.new(torrent)
-trackers = tracker_factory.build
-
-peer_factory = PeerFactory.new(trackers, torrent)
-peers = peer_factory.build
-
-peer_manager = PeerManager.new
-peers.each { |peer| peer_manager.add_peer(peer) }
-
-loop do
-  peer_manager.print_status
-  torrent.piece_manager.print_status
-
-  break if peers.size.zero?
-  break if torrent.piece_manager.download_finished?
-
-  peer_manager.update_peers
-  peer_manager.read_and_dispatch_messages
-  peer_manager.send_messages
-
-  sleep Config.main_loop_sleep_amount
-end
-
-NinjaLogger.logger.info 'Download finished'
-
-raw_chunks = torrent.piece_manager.all_chunks
-file_manager = FileManager.new(torrent, raw_chunks)
-file_manager.build_files!
+overseer = Overseer.new(torrent)
+overseer.run!
 
 nil
