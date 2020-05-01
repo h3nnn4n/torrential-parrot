@@ -5,6 +5,11 @@ require 'yaml'
 class Config
   CONFIG_PATH = './config.yml'
 
+  # If a peer doesnt send any valid piece in X amount of time terminate it
+  def self.peer_idle_timeout
+    config_from_file[__method__.to_s] || 60
+  end
+
   # How many piece requests we can have pending at once, per peer
   def self.max_peer_requests
     config_from_file[__method__.to_s] || 5

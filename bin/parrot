@@ -38,11 +38,14 @@ peers.each { |peer| peer_manager.add_peer(peer) }
 loop do
   peer_manager.print_status
   torrent.piece_manager.print_status
+
   break if peers.size.zero?
   break if torrent.piece_manager.download_finished?
 
+  peer_manager.update_peers
   peer_manager.read_and_dispatch_messages
   peer_manager.send_messages
+
   sleep Config.main_loop_sleep_amount
 end
 

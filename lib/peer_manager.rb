@@ -13,6 +13,15 @@ class PeerManager
     @peers << peer
   end
 
+  def update_peers
+    @peers.each do |peer|
+      if peer.idle_timeout?
+        peer.terminate
+        logger.info "[PEER_MANAGER] Timing out idle peer ##{peer.peer_n}"
+      end
+    end
+  end
+
   def read_and_dispatch_messages
     if connected.count < Config.max_peer_connetions && uninitialized.size.positive?
       peer = uninitialized.first

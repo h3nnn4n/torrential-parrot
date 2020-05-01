@@ -33,6 +33,7 @@ class PeerConnection
     @drops_count = 0
     @message_recv_count = 0
     @message_sent_count = 0
+    @last_piece_received_at = Time.now
     @bitfield = BitField.new(torrent.size)
   end
 
@@ -319,6 +320,8 @@ class PeerConnection
     piece_manager.receive_chunk(piece_index, chunk_offset, chunk_data)
     request_manager.relive_request
 
+    @last_piece_received_at = Time.now
+
     process_message(payload[(payload_size + 4)..-1]) if payload.size > payload_size
   end
 
@@ -360,6 +363,10 @@ class PeerConnection
       max_requests: Config.max_peer_requests,
       timeout: Config.peer_request_timeout
     )
+  end
+
+  def idle_timeout?
+    @state == :handshaked && Time.now - @last_piece_received_at > Config.peer_idle_timeout
   end
 
   def dump(data, info: '')

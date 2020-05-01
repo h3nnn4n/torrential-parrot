@@ -9,7 +9,8 @@ require_relative 'peer_connection'
 class Peer
   extend Forwardable
 
-  def_delegators :connection, :connect, :socket, :process_message
+  def_delegators :connection, :connect, :socket, :process_message, :terminate,
+                 :idle_timeout?
 
   attr_reader :peer_n
 
