@@ -1,8 +1,8 @@
 # Torrent Parrot
 
-[![CircleCI](https://circleci.com/gh/h3nnn4n/torrent-parrot.svg?style=shield)](https://app.circleci.com/pipelines/github/h3nnn4n/torrent-parrot?branch=master)
+[![CircleCI](https://circleci.com/gh/h3nnn4n/torrential-parrot.svg?style=shield)](https://app.circleci.com/pipelines/github/h3nnn4n/torrential-parrot?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbba03ee214941c7896f9137e1b01776)](https://app.codacy.com/manual/h3nnn4n/torrent-parrot?utm_source=github.com&utm_medium=referral&utm_content=h3nnn4n/torrent-parrot&utm_campaign=Badge_Grade_Dashboard)
-[![codecov](https://codecov.io/gh/h3nnn4n/torrent-parrot/branch/master/graph/badge.svg)](https://codecov.io/gh/h3nnn4n/torrent-parrot)
+[![codecov](https://codecov.io/gh/h3nnn4n/torrential-parrot/branch/master/graph/badge.svg)](https://codecov.io/gh/h3nnn4n/torrential-parrot)
 
 A ruby bittorrent client for celebrating parrots
 
