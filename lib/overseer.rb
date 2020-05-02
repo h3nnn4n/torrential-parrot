@@ -15,6 +15,11 @@ class Overseer
   def initialize(torrent)
     @torrent = torrent
     @peers = []
+
+    # This is only temporary and will be deprecated when ncurses interface is
+    # implemented
+    @message_timer = Time.now
+    @message_interval = 5
   end
 
   def run!
@@ -22,8 +27,11 @@ class Overseer
     add_peers_to_peer_manager
 
     loop do
-      peer_manager.print_status
-      @torrent.piece_manager.print_status
+      if Time.now - @message_timer > @message_interval
+        @message_timer = Time.now
+        peer_manager.print_status
+        @torrent.piece_manager.print_status
+      end
 
       break if @peers.size.zero?
       break if @torrent.piece_manager.download_finished?
