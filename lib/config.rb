@@ -5,6 +5,14 @@ require 'yaml'
 class Config
   CONFIG_PATH = './config.yml'
 
+  def self.status_update_interval
+    config_from_file[__method__.to_s] || 5
+  end
+
+  def self.local_debug
+    config_from_file[__method__.to_s].to_s.downcase == 'true' || false
+  end
+
   def self.listen_port
     config_from_file[__method__.to_s] || 6881
   end

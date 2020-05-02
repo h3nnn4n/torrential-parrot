@@ -2,6 +2,7 @@
 
 require 'config'
 require 'file_manager'
+require 'ninja_logger'
 require 'overseer'
 require 'peer'
 require 'peer_factory'
@@ -19,12 +20,18 @@ class Overseer
     # This is only temporary and will be deprecated when ncurses interface is
     # implemented
     @message_timer = Time.now
-    @message_interval = 5
+    @message_interval = Config.status_update_interval
+
+    @local_debug = Config.local_debug
   end
 
   def run!
-    fetch_new_peers_from_tracker
-    add_peers_to_peer_manager
+    if @local_debug
+      add_local_peers
+    else
+      fetch_new_peers_from_tracker
+      add_peers_to_peer_manager
+    end
 
     loop do
       if Time.now - @message_timer > @message_interval
@@ -36,7 +43,7 @@ class Overseer
       break if @peers.size.zero?
       break if @torrent.piece_manager.download_finished?
 
-      if peer_manager.needs_more_peers?
+      if peer_manager.needs_more_peers? && !@local_debug
         recycle_dead_peers
         fetch_new_peers_from_tracker
         add_peers_to_peer_manager
@@ -87,5 +94,14 @@ class Overseer
     raw_chunks = @torrent.piece_manager.all_chunks
     file_manager = FileManager.new(@torrent, raw_chunks)
     file_manager.build_files!
+  end
+
+  def add_local_peers
+    @trackers = tracker_factory.build
+
+    peer_id = @trackers.first.peer_id
+    peer = Peer.new('127.0.0.1', 51_413, @torrent, peer_id, peer_n: 1)
+    peer_manager.add_peer(peer)
+    @peers << peer
   end
 end
