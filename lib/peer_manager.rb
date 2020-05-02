@@ -62,7 +62,11 @@ class PeerManager
   end
 
   def recycle_dead_peers
-    dead.each(&:recycle)
+    @peers.each do |peer|
+      next if peer.connection.state != :dead
+
+      peer.recycle
+    end
   end
 
   private

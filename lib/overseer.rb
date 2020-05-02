@@ -79,6 +79,10 @@ class Overseer
     @peers += peer_factory.build
   end
 
+  def recycle_dead_peers
+    peer_manager.recycle_dead_peers
+  end
+
   def write_torrent_to_disk
     raw_chunks = @torrent.piece_manager.all_chunks
     file_manager = FileManager.new(@torrent, raw_chunks)
