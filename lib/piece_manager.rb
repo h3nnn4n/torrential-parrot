@@ -104,11 +104,18 @@ class PieceManager
     chunks =
       (0..(number_of_pieces - 1)).map do |piece_index|
         (0..(number_of_chunks - 1)).map do |chunk_index|
+          next if last_piece?(piece_index) && chunk_index > last_piece_number_of_chunks - 1
+
           @pieces[piece_index].chunks[chunk_index].payload
         end
       end
 
-    chunks.flatten
+    bytes_missing = @torrent.size - chunks.flatten.join.size
+    raise "[PIECE_MANAGER] #{bytes_missing} are missing" if bytes_missing.positive?
+
+    chunks.flatten!
+    chunks.compact!
+    chunks
   end
 
   def pending_chunks

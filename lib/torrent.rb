@@ -43,7 +43,11 @@ class Torrent
   end
 
   def single_file?
-    @bdata.dig('info', 'files').nil?
+    files.nil?
+  end
+
+  def files
+    @bdata.dig('info', 'files')
   end
 
   def file_name
