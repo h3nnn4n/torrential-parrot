@@ -74,8 +74,11 @@ class PieceManager
   end
 
   def last_chunk?(piece_index, chunk_offset)
+    total_chunks = (torrent_size / Config.chunk_size.to_f).ceil
+    last_chunk_index = (total_chunks % number_of_chunks) - 1
+    last_chunk_index = number_of_chunks - 1 if last_chunk_index.negative?
     chunk_index = chunk_offset / Config.chunk_size
-    piece_index == number_of_pieces - 1 && chunk_index == number_of_chunks - 1
+    piece_index == number_of_pieces - 1 && chunk_index == last_chunk_index
   end
 
   def number_of_chunks

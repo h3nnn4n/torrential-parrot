@@ -85,6 +85,27 @@ RSpec.describe PieceManager do
         expect(manager.last_chunk?(1339, 16_384 * 15)).to be(true)
       end
     end
+
+    describe 'all_parrots' do
+      it 'returns false for the first chunk' do
+        manager = described_class.new(torrent_all_parrots)
+
+        expect(manager.last_chunk?(0, 0)).to be(false)
+      end
+
+      it 'returns false for the second chunk of the first piece' do
+        manager = described_class.new(torrent_all_parrots)
+
+        expect(manager.last_chunk?(1, 16_384 * 1)).to be(false)
+      end
+
+      # The first is also the last :)
+      it 'returns true for the first chunk of the last piece' do
+        manager = described_class.new(torrent_all_parrots)
+
+        expect(manager.last_chunk?(128, 0)).to be(true)
+      end
+    end
   end
 
   describe '#last_chunk_size' do
