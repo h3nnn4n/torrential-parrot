@@ -6,3 +6,5 @@ do
 done
 
 rm -- *.dat &> /dev/null || true
+
+rm -r folder *.iso log.zera parrots pi6.txt &> /dev/null || true
