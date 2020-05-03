@@ -8,11 +8,11 @@ class Piece
   attr_accessor :piece_hash
   attr_reader :chunks
 
-  def initialize(piece_size, piece_index, piece_hash: nil)
+  def initialize(piece_size, piece_index, piece_hash: nil, number_of_chunks: nil)
     @piece_size = piece_size
     @piece_index = piece_index
     @chunks = {}
-    @number_of_chunks = piece_size / Config.chunk_size
+    @number_of_chunks = number_of_chunks || piece_size / Config.chunk_size
     @piece_hash = piece_hash
   end
 

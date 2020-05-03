@@ -41,6 +41,36 @@ RSpec.describe PieceManager do
 
   describe '#last_chunk?' do
     describe 'pi6' do
+      it 'returns false for the first piece' do
+        manager = described_class.new(torrent_pi6)
+
+        expect(manager.last_piece?(0)).to be(false)
+      end
+
+      it 'returns true for the last piece' do
+        manager = described_class.new(torrent_pi6)
+
+        expect(manager.last_piece?(33)).to be(true)
+      end
+    end
+
+    describe 'debian' do
+      it 'returns false for the first piece' do
+        manager = described_class.new(torrent_debian)
+
+        expect(manager.last_piece?(0)).to be(false)
+      end
+
+      it 'returns true for the last piece' do
+        manager = described_class.new(torrent_debian)
+
+        expect(manager.last_piece?(1339)).to be(true)
+      end
+    end
+  end
+
+  describe '#last_chunk?' do
+    describe 'pi6' do
       it 'returns false for the first chunk' do
         manager = described_class.new(torrent_pi6)
 

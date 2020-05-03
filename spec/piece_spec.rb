@@ -240,6 +240,33 @@ RSpec.describe Piece do
 
       expect(piece.completed?).to be(false)
     end
+
+    context 'all_parrots' do
+      let(:piece) do
+        described_class.new(
+          torrent_all_parrots.piece_size,
+          torrent_all_parrots.number_of_pieces - 1,
+          number_of_chunks: 1
+        )
+      end
+
+      it 'returns false if nothing was requested' do
+        expect(piece.completed?).to be(false)
+      end
+
+      it 'returns false if chunk was requested but not received' do
+        piece.request_chunk(0)
+
+        expect(piece.completed?).to be(false)
+      end
+
+      it 'returns true if chunk received' do
+        piece.request_chunk(0)
+        piece.receive_chunk(0, 'hi i am special')
+
+        expect(piece.completed?).to be(true)
+      end
+    end
   end
 
   describe '#integrity_check' do

@@ -40,7 +40,7 @@ class PieceManager
 
   def incomplete_piece(bitfield)
     bitfield.all_bits_set_index.each do |piece_index|
-      @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
+      lazy_build_piece(piece_index)
       @pieces[piece_index].tap do |piece|
         next piece unless piece.missing_chunk? || piece.timedout_chunks?
         next piece unless piece.unrequested_chunk? || piece.timedout_chunks?
@@ -53,7 +53,7 @@ class PieceManager
   end
 
   def request_chunk(piece_index, chunk_offset)
-    @pieces[piece_index] ||= Piece.new(piece_size, piece_index)
+    lazy_build_piece(piece_index)
     @pieces[piece_index].tap do |piece|
       piece.request_chunk(chunk_offset)
     end
@@ -74,11 +74,19 @@ class PieceManager
   end
 
   def last_chunk?(piece_index, chunk_offset)
-    total_chunks = (torrent_size / Config.chunk_size.to_f).ceil
-    last_chunk_index = (total_chunks % number_of_chunks) - 1
-    last_chunk_index = number_of_chunks - 1 if last_chunk_index.negative?
     chunk_index = chunk_offset / Config.chunk_size
-    piece_index == number_of_pieces - 1 && chunk_index == last_chunk_index
+    last_piece?(piece_index) && chunk_index == last_piece_number_of_chunks - 1
+  end
+
+  def last_piece_number_of_chunks
+    total_chunks = (torrent_size / Config.chunk_size.to_f).ceil
+    n = total_chunks % number_of_chunks
+    n = number_of_chunks if n.zero?
+    n
+  end
+
+  def last_piece?(piece_index)
+    piece_index == number_of_pieces - 1
   end
 
   def number_of_chunks
@@ -135,6 +143,19 @@ class PieceManager
     end
 
     indexes
+  end
+
+  def lazy_build_piece(piece_index)
+    this_number_of_chunks =
+      if last_piece?(piece_index)
+        last_piece_number_of_chunks
+      else
+        number_of_chunks
+      end
+
+    @pieces[piece_index] ||= Piece.new(piece_size,
+                                       piece_index,
+                                       number_of_chunks: this_number_of_chunks)
   end
 
   def chunk_status
