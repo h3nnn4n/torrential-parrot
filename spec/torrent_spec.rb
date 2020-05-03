@@ -42,12 +42,19 @@ RSpec.describe Torrent do
       expect(torrent2.info_hash).to eq(info_hash)
     end
 
-    it 'returns the packed info_hash for torrent' do
-      expect(torrent.info_hash_packed.size).to eq(20)
+    it 'returns the info_hash for archlinux' do
+      info_hash = '1027de87dc168253781f83b183ece4dffa402f40'
+      expect(torrent_archlinux.info_hash).to eq(info_hash)
     end
 
-    it 'returns the packed info_hash for torrent2' do
-      expect(torrent2.info_hash_packed.size).to eq(20)
+    it 'returns the info_hash for debian' do
+      info_hash = '5a8062c076fa85e8056451c0d9aa04349ae27909'
+      expect(torrent_debian.info_hash).to eq(info_hash)
+    end
+
+    it 'returns the info_hash for all_parrots' do
+      info_hash = '597bb7dfd675711b8c313e295d0451705670dc52'
+      expect(torrent_all_parrots.info_hash).to eq(info_hash)
     end
   end
 

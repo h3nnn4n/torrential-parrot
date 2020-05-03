@@ -64,11 +64,13 @@ class Torrent
 
   def info_hash
     @info_hash ||= begin
-      starter_index = @raw_data.index('4:info') + 6
-      end_index = @raw_data.size - 2
+      # HACK: The correct way to calculate the hash is to read directly from
+      # the torrent file. However, this leads to some issues with file
+      # encodings, which for now I am simply skipping. Parsing the torrent
+      # file, extracting the data for hashing, reencoding it and applying sha1
+      # is easier
 
-      info_data = @raw_data[starter_index..end_index]
-
+      info_data = @bdata['info'].bencode
       Digest::SHA1.hexdigest(info_data)
     end
   end

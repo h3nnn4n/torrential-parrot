@@ -8,32 +8,27 @@ class UdpTracker < BaseTracker
   attr_reader :connection_id
 
   def connect
-    logger.info "[UDP_TRACKER] sending connect package with transaction_id #{transaction_id}"
+    logger.info "[UDP_TRACKER] sending connect package with transaction_id #{transaction_id} to #{@tracker_s}"
 
     payload = connection_message(transaction_id)
     response = nil
 
-    max_retries = 4
+    max_retries = 3
     (0..max_retries).each do |retry_n|
       socket.send(payload, 0)
 
-      Timeout.timeout(0.5) do
+      Timeout.timeout(1.5) do
         response = socket.recvfrom(1024)
       end
     rescue Timeout::Error
-      if retry_n < max_retries
-        logger.warn "[UDP_TRACKER] timed out ##{retry_n}"
-      else
-        logger.warn '[UDP_TRACKER] giving up!'
-        return false
-      end
+      return false if retry_n >= max_retries
     end
 
     action_r, transaction_id_r, conn0, conn1 = response.first.unpack('NNNN')
 
     @connection_id = conn0 << 32 | conn1
 
-    logger.info "[UDP_TRACKER] connection_id is #{@connection_id}"
+    # logger.info "[UDP_TRACKER] connection_id is #{@connection_id}"
 
     return false unless transaction_id == transaction_id_r
     raise 'invalid action' unless action_r.zero?
@@ -52,24 +47,19 @@ class UdpTracker < BaseTracker
 
     payload = announce_message(transaction_id, action_id, info_hash, key_id)
 
-    logger.info "[UDP_TRACKER] sending annound with transaction_id #{transaction_id}"
+    # logger.info "[UDP_TRACKER] sending annound with transaction_id #{transaction_id}"
 
     response_full = nil
-    max_retries = 4
+    max_retries = 3
 
     (0..max_retries).each do |retry_n|
       socket.send(payload, 0)
 
-      Timeout.timeout(0.5) do
+      Timeout.timeout(1.5) do
         response_full = socket.recvfrom(1024)
       end
     rescue Timeout::Error
-      if retry_n < max_retries
-        logger.warn "[UDP_TRACKER] timed out ##{retry_n}"
-      else
-        logger.warn '[UDP_TRACKER] giving up!'
-        return false
-      end
+      return false if retry_n >= max_retries
     end
 
     response = response_full.first
@@ -83,16 +73,16 @@ class UdpTracker < BaseTracker
 
     header = response[0..20]
     peers = response[20..response.size]
-    n_peers = peers.size / 6
+    _n_peers = peers.size / 6
 
-    action_r, transaction_id_r, interval, leechers, seeders = header.unpack('NNNNN')
+    action_r, transaction_id_r, _interval, _leechers, _seeders = header.unpack('NNNNN')
 
     return false unless transaction_id == transaction_id_r
     raise "got error #{response} #{action_r}" unless action_r == 1
 
-    logger.info "[UDP_TRACKER] announce interval is #{interval}"
-    logger.info "[UDP_TRACKER] leechers #{leechers} and seeders #{seeders}"
-    logger.info "[UDP_TRACKER] received #{n_peers} of the #{@wanted_peers} requested peers"
+    # logger.info "[UDP_TRACKER] announce interval is #{interval}"
+    # logger.info "[UDP_TRACKER] leechers #{leechers} and seeders #{seeders}"
+    # logger.info "[UDP_TRACKER] received #{n_peers} of the #{@wanted_peers} requested peers"
 
     decode_peers(peers)
   rescue SocketError, Errno::ECONNREFUSED
@@ -132,7 +122,7 @@ class UdpTracker < BaseTracker
       key_id,                        # 32-bit integer key
       @wanted_peers,                 # 32-bit integer - desired number of peers
       listen_port                    # 16-bit integer - port
-    ].pack('NNNNa20a20NNNNNNNNNNn')
+    ].pack('NNNNH40a20NNNNNNNNNNn')
   end
 
   def socket

@@ -101,4 +101,58 @@ RSpec.describe UdpTracker do
       expect(tracker.announce(torrent)).to be(false)
     end
   end
+
+  describe '#announce_response' do
+    let(:info_hash) { torrent.info_hash }
+    let(:message) { tracker.send(:announce_message, 123, 1, info_hash, 321) }
+    let(:tracker) do
+      tracker_url = 'udp://tracker.opentrackr.org:1337/announce'
+      t = described_class.new(tracker_url)
+
+      allow(t).to receive(:transaction_id).and_return(12_345)
+      allow(t).to receive(:connection_id).and_return(0x92804b684d0725d8)
+
+      t
+    end
+
+    it 'has the correct connection_id' do
+      conn0, conn1 = message.unpack('NN')
+
+      connection_id = conn0 << 32 | conn1
+
+      expect(connection_id).to eq(0x92804b684d0725d8)
+    end
+
+    it 'has the correct action_id' do
+      _, _, action = message.unpack('NNN')
+
+      expect(action).to eq(1)
+    end
+
+    it 'has the correct transaction_id' do
+      _, _, _, transaction_id = message.unpack('NNNN')
+
+      expect(transaction_id).to eq(123)
+    end
+
+    context 'all_parrots' do
+      let(:torrent) { torrent_all_parrots }
+
+      it 'has the correct info_hash' do
+        _, _, _, _, info_hash_ = message.unpack('NNNNH40')
+
+        expect(info_hash_).to eq(torrent.info_hash)
+      end
+    end
+
+    context 'debian' do
+      let(:torrent) { torrent_debian }
+
+      it 'has the correct info_hash 2' do
+        _, _, _, _, info_hash_ = message.unpack('NNNNH40')
+
+        expect(info_hash_).to eq(torrent.info_hash)
+      end
+    end
+  end
 end
