@@ -9,11 +9,11 @@ class PeerFactory
     @trackers = trackers
     @torrent = torrent
     @last_peer_id = 0
-
-    @peer_ips = Set.new
   end
 
   def build
+    @peer_ips = Set.new
+
     peers = []
 
     @trackers.each do |tracker|
@@ -43,6 +43,8 @@ class PeerFactory
 
     peers
   end
+
+  private
 
   def next_peer_n
     @last_peer_id += 1

@@ -61,6 +61,12 @@ class PeerManager
     uninitialized.count.zero? && connected.count < Config.max_peer_connetions
   end
 
+  def remove_dead_peers
+    @peers.reject! do |peer|
+      peer.connection.state == :dead
+    end
+  end
+
   def recycle_dead_peers
     @peers.each do |peer|
       next if peer.connection.state != :dead

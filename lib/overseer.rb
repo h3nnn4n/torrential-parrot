@@ -44,7 +44,8 @@ class Overseer
       break if @torrent.piece_manager.download_finished?
 
       if peer_manager.needs_more_peers? && !@local_debug
-        recycle_dead_peers
+        # recycle_dead_peers
+        remove_dead_peers
         fetch_new_peers_from_tracker
         add_peers_to_peer_manager
       end
@@ -87,6 +88,10 @@ class Overseer
   def fetch_new_peers_from_tracker
     @trackers = tracker_factory.build
     @peers += peer_factory.build
+  end
+
+  def remove_dead_peers
+    peer_manager.remove_dead_peers
   end
 
   def recycle_dead_peers
