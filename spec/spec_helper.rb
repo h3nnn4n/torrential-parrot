@@ -130,6 +130,7 @@ end
 require 'bencode'
 require 'torrent'
 
+# FIXME: This is dumb. I should have used let or something like that
 def torrent
   filepath = 'spec/files/potato.torrent'
 
