@@ -31,6 +31,12 @@ RSpec.describe PieceManager do
 
       expect(manager.number_of_pieces).to eq(torrent_pi6.number_of_pieces)
     end
+
+    it 'is 129 for all_parrots' do
+      manager = described_class.new(torrent_all_parrots)
+
+      expect(manager.number_of_pieces).to eq(torrent_all_parrots.number_of_pieces)
+    end
   end
 
   describe '#last_chunk?' do
@@ -122,6 +128,14 @@ RSpec.describe PieceManager do
         manager = described_class.new(torrent_debian)
 
         expect(manager.last_chunk_size).to eq(16_384)
+      end
+    end
+
+    describe 'all_parrots' do
+      it 'returns the correct value' do
+        manager = described_class.new(torrent_all_parrots)
+
+        expect(manager.last_chunk_size).to eq(12_811)
       end
     end
   end

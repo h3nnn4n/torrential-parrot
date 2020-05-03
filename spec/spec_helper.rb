@@ -174,3 +174,12 @@ def torrent_pi6
 
   Torrent.new(torrent_info, data)
 end
+
+def torrent_all_parrots
+  filepath = 'spec/files/all_parrots.torrent'
+
+  data = File.read(filepath)
+  torrent_info = BEncode.load(data)
+
+  Torrent.new(torrent_info, data)
+end
