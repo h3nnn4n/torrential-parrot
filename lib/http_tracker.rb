@@ -38,7 +38,8 @@ class HttpTracker < BaseTracker
     peers = data['peers']
 
     decode_peers(peers)
-  rescue Net::OpenTimeout, OpenSSL::SSL::SSLError, Net::ReadTimeout, Errno::ECONNREFUSED
+  rescue Net::OpenTimeout, OpenSSL::SSL::SSLError, Net::ReadTimeout,
+         Errno::ECONNREFUSED, SocketError
     false
   end
 end
