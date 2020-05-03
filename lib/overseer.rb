@@ -56,6 +56,9 @@ class Overseer
       sleep Config.main_loop_sleep_amount
     end
 
+    peer_manager.print_status
+    @torrent.piece_manager.print_status
+
     write_torrent_to_disk
   end
 
